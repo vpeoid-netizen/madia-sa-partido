@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" role="img" aria-label="MADIA sa Partido">
+  <defs>
+    <linearGradient id="madia-wave" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b3d5e"/>
+      <stop offset="55%" stop-color="#1f6f8b"/>
+      <stop offset="100%" stop-color="#7ec8c7"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="92" height="92" rx="18" fill="url(#madia-wave)"/>
+  <path d="M18 62 C28 42, 42 34, 52 40 C58 44, 62 52, 68 58 C72 62, 78 64, 84 60" fill="none" stroke="#f2e6d0" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="66" cy="34" r="8" fill="#f7d774"/>
+  <text x="108" y="46" fill="#0b3d5e" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700" letter-spacing="0.04em">MADIA</text>
+  <text x="108" y="72" fill="#1f6f8b" font-family="system-ui, -apple-system, sans-serif" font-size="17" font-weight="600" letter-spacing="0.12em">SA PARTIDO</text>
+</svg>

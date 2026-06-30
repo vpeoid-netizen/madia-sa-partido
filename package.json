@@ -1,0 +1,32 @@
+{
+  "name": "madia-sa-partido",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "apply:production": "node scripts/apply-production-update.mjs && node scripts/apply-documentation-update.mjs",
+    "setup": "npm run apply:production && npm install && npm run process:geojson && npm run import:data",
+    "predev": "npm run apply:production && npm run import:data && npm run start:ollama",
+    "fix:permissions": "node scripts/fix-permissions.mjs",
+    "start:ollama": "node scripts/start-ollama.mjs",
+    "deploy:github": "node scripts/github-push.mjs",
+    "dev": "npm run dev --workspace=@madia/web",
+    "dev:direct": "npm run dev --workspace=@madia/web",
+    "dev:web": "npm run dev --workspace=@madia/web",
+    "prebuild": "npm run apply:production && npm run import:data",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "check": "npm run lint && npm run test && npm run build",
+    "import:data": "node scripts/import-runtime.mjs",
+    "import:dry-run": "node scripts/import-runtime.mjs --dry-run",
+    "process:geojson": "python3 scripts/process-partido-geojson.py",
+    "db:migrate": "npm run migrate --workspace=@madia/supabase-scripts"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

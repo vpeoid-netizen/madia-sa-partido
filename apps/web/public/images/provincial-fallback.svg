@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="Partido Area placeholder">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7ec8e3"/>
+      <stop offset="100%" stop-color="#d8eef8"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2f7d4f"/>
+      <stop offset="100%" stop-color="#0b3d5e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#sky)"/>
+  <path d="M0 430 C180 360 300 470 480 410 C660 350 820 460 1200 390 L1200 675 L0 675 Z" fill="url(#hill)"/>
+  <circle cx="980" cy="120" r="56" fill="#f7d774"/>
+  <text x="600" y="610" text-anchor="middle" fill="#ffffff" font-family="Georgia, serif" font-size="42">MADIA sa Partido</text>
+</svg>

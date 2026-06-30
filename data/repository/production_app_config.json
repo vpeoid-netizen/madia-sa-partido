@@ -1,0 +1,192 @@
+{
+  "project": "MADIA sa Partido",
+  "release": "0.11-production-experience",
+  "app_mode": "production",
+  "public_language_rules": {
+    "forbidden_visible_terms": [
+      "demo",
+      "sample data",
+      "placeholder data",
+      "needs review",
+      "low confidence",
+      "medium confidence",
+      "unverified",
+      "partially verified",
+      "pending verification",
+      "coming soon",
+      "under construction",
+      "preliminary",
+      "prototype"
+    ],
+    "missing_field_behavior": "Omit the field or section. Never render unfinished-state text.",
+    "internal_audit_visibility": "Administrator interfaces only",
+    "public_record_status": "published"
+  },
+  "landing_page": {
+    "primary_component": "AttractionCarousel",
+    "data_source": "public_attractions.json",
+    "show_all_attractions": true,
+    "fields": [
+      "name",
+      "address",
+      "type",
+      "brief_description",
+      "image_url",
+      "detail_route"
+    ],
+    "required_actions": [
+      "Explore attraction",
+      "Add to itinerary"
+    ],
+    "desktop_layout": "Large cinematic carousel with one dominant card and visible adjacent cards",
+    "mobile_layout": "Full-width snap carousel with swipe gestures and persistent itinerary action",
+    "autoplay": true,
+    "autoplay_interval_ms": 6500,
+    "pause_on_hover_focus_interaction": true,
+    "keyboard_navigation": true,
+    "screen_reader_announcements": true,
+    "fallback_visual": "Elegant branded provincial artwork; never label it as a placeholder",
+    "secondary_navigation": [
+      "Search",
+      "Municipalities",
+      "Map",
+      "My itinerary",
+      "AI itinerary assistant"
+    ]
+  },
+  "visual_direction": {
+    "mood": "Elegant contemporary tourism application with a refined provincial identity",
+    "reference_quality": "Airbnb and Agoda level of polish, usability, trust and responsiveness",
+    "palette": {
+      "forest": "#244A3A",
+      "deep_sea": "#174C5E",
+      "terracotta": "#A65F3F",
+      "warm_sand": "#E8DCC7",
+      "abaca": "#C5A56A",
+      "ivory": "#F8F5EE",
+      "charcoal": "#202623"
+    },
+    "materials": [
+      "restrained liquid glass",
+      "subtle abaca and woven-fiber texture",
+      "soft natural shadows",
+      "high-quality destination photography",
+      "gentle topographic and coastal motifs"
+    ],
+    "typography": {
+      "display": "BARABARA",
+      "body": "Accessible modern sans-serif",
+      "rules": "Use BARABARA for headings and identity moments, not long body text"
+    },
+    "avoid": [
+      "tourism-template appearance",
+      "excessive glass blur",
+      "cartoon provincial motifs",
+      "unfinished labels",
+      "developer diagnostics in public UI",
+      "generic dashboard styling"
+    ]
+  },
+  "frontend_scope": {
+    "required_routes": [
+      "/",
+      "/attractions",
+      "/attractions/[slug]",
+      "/municipalities",
+      "/municipalities/[slug]",
+      "/map",
+      "/itinerary",
+      "/assistant",
+      "/saved",
+      "/account",
+      "/admin"
+    ],
+    "required_features": [
+      "responsive attraction carousel",
+      "search and filters",
+      "attraction detail pages",
+      "municipality pages",
+      "interactive map",
+      "itinerary builder",
+      "grounded AI itinerary assistant",
+      "saved trips and favorites",
+      "photo attribution display",
+      "loading, empty and error states",
+      "WCAG 2.2 AA accessibility",
+      "SEO and structured data",
+      "image optimization and lazy loading",
+      "installable PWA behavior where supported"
+    ],
+    "quality_bar": "No dead links, empty components, exposed TODOs, mock buttons or incomplete navigation."
+  },
+  "backend_scope": {
+    "required_services": [
+      "production database and migrations",
+      "role-based authentication and authorization",
+      "attraction and municipality CRUD",
+      "media and attribution management",
+      "versioned import pipeline",
+      "full-text and faceted search",
+      "itinerary persistence",
+      "AI retrieval with source grounding",
+      "admin publishing controls",
+      "audit logs",
+      "rate limiting and abuse protection",
+      "caching",
+      "background media processing",
+      "health checks, logging and monitoring",
+      "backup and restore procedures"
+    ],
+    "roles": [
+      "public_user",
+      "registered_traveler",
+      "content_editor",
+      "municipal_validator",
+      "administrator",
+      "super_administrator"
+    ],
+    "api_requirements": [
+      "typed schemas",
+      "input validation",
+      "pagination",
+      "stable identifiers",
+      "consistent errors",
+      "API documentation",
+      "automated tests"
+    ]
+  },
+  "ai_assistant": {
+    "purpose": "Build practical itineraries from published MADIA attractions and traveler constraints",
+    "required_inputs": [
+      "travel dates",
+      "party size",
+      "origin",
+      "interests",
+      "budget",
+      "mobility needs",
+      "travel pace"
+    ],
+    "required_output": [
+      "day-by-day plan",
+      "travel sequence",
+      "estimated visit windows",
+      "attraction references",
+      "editable itinerary items"
+    ],
+    "grounding_rule": "Use only imported MADIA content and clearly cited application records.",
+    "failure_behavior": "Ask for missing trip constraints or omit unsupported details; never invent operating hours, fares or availability."
+  },
+  "delivery_acceptance": {
+    "frontend_complete": true,
+    "backend_complete": true,
+    "database_migrations_present": true,
+    "seed_importer_present": true,
+    "admin_interface_present": true,
+    "automated_tests_present": true,
+    "production_build_passes": true,
+    "responsive_breakpoints_verified": true,
+    "accessibility_audit_passes": true,
+    "no_demo_language_visible": true,
+    "no_review_confidence_language_visible": true
+  }
+}

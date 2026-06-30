@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "cd ../.. && npm run import:data && npm run build --workspace=@madia/domain --workspace=@madia/ai --workspace=@madia/maps --workspace=@madia/ui && npm run build --workspace=@madia/web",
+  "framework": "nextjs"
+}

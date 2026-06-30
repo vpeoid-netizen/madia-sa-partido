@@ -1,0 +1,10 @@
+﻿area,requirement,required
+Landing page,Carousel contains every public attraction record,True
+Landing page,"Each card shows name, address, type and brief description",True
+Landing page,Explore and Add to itinerary actions work,True
+Public copy,"No demo, review, confidence or unfinished language is visible",True
+Design,Elegant provincial visual identity is applied consistently,True
+Frontend,"All routes, controls, forms, states and navigation are functional",True
+Backend,"Database, auth, CRUD, media, imports, search, itinerary and AI services are operational",True
+Accessibility,"Keyboard, focus, contrast, labels and motion preferences meet WCAG 2.2 AA",True
+Quality,"Production build, tests and error monitoring pass",True
