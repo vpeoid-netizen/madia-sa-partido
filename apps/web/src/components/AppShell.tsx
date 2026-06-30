@@ -64,6 +64,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             />
           </span>
           <p>Your local guide to the destinations, culture, and communities of Partido.</p>
+          <p className="site-footer__origin">
+            In the Partido area, &ldquo;madia&rdquo; is a colloquial invitation meaning
+            &ldquo;let&rsquo;s go,&rdquo; &ldquo;come on,&rdquo; or &ldquo;come here,&rdquo; and is
+            locally explained as a contraction of the Bikol words &ldquo;ma&rdquo; and
+            &ldquo;diyan.&rdquo; The name therefore carries both a functional meaning and a local
+            cultural identity: it describes the technology while inviting people to discover Partido
+            in a language familiar to its communities.
+          </p>
         </div>
         <nav aria-label="Footer">
           <Link href="/explore">Destinations</Link>
