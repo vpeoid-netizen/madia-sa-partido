@@ -82,6 +82,9 @@ export function createSampleItinerary(input: {
     record_id: string;
     official_name: string;
     verification_status: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    address?: string;
   }>;
   travelerCount?: number;
 }): Trip {
@@ -97,6 +100,9 @@ export function createSampleItinerary(input: {
     duration_minutes: 90,
     verification_status: place.verification_status,
     cost_confidence: 'medium' as const,
+    latitude: place.latitude ?? null,
+    longitude: place.longitude ?? null,
+    address: place.address,
   }));
 
   const day = {

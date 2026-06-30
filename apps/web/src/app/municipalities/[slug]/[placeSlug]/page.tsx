@@ -7,6 +7,7 @@ import { RelatedPlaces } from '@/components/RelatedPlaces';
 import { SaveFavoriteButton } from '@/components/SaveFavoriteButton';
 import { TripBuilderPanel } from '@/components/TripBuilderPanel';
 import { MadiaImage } from '@/components/MadiaImage';
+import { wazeLinkForStop } from '@/lib/waze';
 import {
   getMunicipalityBySlug,
   getPlaceBySlug,
@@ -39,6 +40,7 @@ export default async function PlacePage({
   const place = getPlaceBySlug(slug, placeSlug);
   if (!place) notFound();
 
+  const municipalityName = municipality.meta.displayName;
   const heroImage = getPlaceImage(place);
   const gallery = getPlaceGallery(place);
   const municipalityPlaces = getPlacesForMunicipality(municipality.meta.id);
@@ -46,7 +48,7 @@ export default async function PlacePage({
   const lng = parseCoordinate(place.longitude);
   const address =
     publicText(place.complete_address) ||
-    [publicText(place.barangay), municipality.meta.displayName, 'Camarines Sur']
+    [publicText(place.barangay), municipalityName, 'Camarines Sur']
       .filter(Boolean)
       .join(', ');
   const overview = publicText(place.full_description) || publicText(place.short_description);
@@ -54,6 +56,36 @@ export default async function PlacePage({
   const visitDuration = publicText(place.recommended_visit_duration);
   const bestTime = publicText(place.best_time_to_visit);
   const detailRoute = place.application_page_route || `/municipalities/${slug}/${placeSlug}`;
+  const wazeUrl = wazeLinkForStop(
+    {
+      place_name: place.official_name,
+      latitude: lat,
+      longitude: lng,
+      address,
+      municipality: municipalityName,
+    },
+    { navigate: true },
+  );
+
+  function placeRef(item: (typeof municipalityPlaces)[number]) {
+    const itemLat = parseCoordinate(item.latitude);
+    const itemLng = parseCoordinate(item.longitude);
+    const itemAddress =
+      publicText(item.complete_address) ||
+      [publicText(item.barangay), municipalityName, 'Camarines Sur']
+        .filter(Boolean)
+        .join(', ');
+
+    return {
+      record_id: item.record_id,
+      official_name: item.official_name,
+      verification_status: 'VERIFIED',
+      entrance_fee: publicText(item.entrance_fee),
+      latitude: itemLat,
+      longitude: itemLng,
+      address: itemAddress || undefined,
+    };
+  }
 
   return (
     <div className="destination-page">
@@ -62,13 +94,13 @@ export default async function PlacePage({
         className="button button-secondary"
         style={{ marginBottom: '1rem' }}
       >
-        ← Back to {municipality.meta.displayName}
+        ← Back to {municipalityName}
       </Link>
 
       <div className="place-hero madia-image-frame">
         <MadiaImage
           src={heroImage.url}
-          alt={`${place.official_name} in ${municipality.meta.displayName}`}
+          alt={`${place.official_name} in ${municipalityName}`}
           fill
           priority
           sizes="100vw"
@@ -105,16 +137,26 @@ export default async function PlacePage({
         <section className="madia-glass detail-panel">
           <h2>Location</h2>
           <p>{address}</p>
-          {lat !== null && lng !== null && (
+          <div className="location-links">
+            {lat !== null && lng !== null && (
+              <a
+                href={`https://www.google.com/maps?q=${lat},${lng}`}
+                target="_blank"
+                rel="noreferrer"
+                className="button button-secondary"
+              >
+                Open in Google Maps
+              </a>
+            )}
             <a
-              href={`https://www.google.com/maps?q=${lat},${lng}`}
+              href={wazeUrl}
               target="_blank"
-              rel="noreferrer"
-              className="text-link"
+              rel="noopener noreferrer"
+              className="button button-primary waze-button"
             >
-              Open in maps →
+              Open in Waze
             </a>
-          )}
+          </div>
         </section>
       )}
 
@@ -135,28 +177,21 @@ export default async function PlacePage({
 
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
         <AiPlacePanel
-          municipalityName={municipality.meta.displayName}
+          municipalityName={municipalityName}
           placeId={place.record_id}
           placeName={place.official_name}
         />
         <TripBuilderPanel
           municipalitySlug={slug}
-          municipalityName={municipality.meta.displayName}
+          municipalityName={municipalityName}
           focusPlace={{
-            record_id: place.record_id,
-            official_name: place.official_name,
-            verification_status: 'VERIFIED',
+            ...placeRef(place),
             entrance_fee: fee,
           }}
           places={municipalityPlaces
             .filter((item) => item.record_type === 'attraction')
             .slice(0, 8)
-            .map((item) => ({
-              record_id: item.record_id,
-              official_name: item.official_name,
-              verification_status: 'VERIFIED',
-              entrance_fee: publicText(item.entrance_fee),
-            }))}
+            .map(placeRef)}
         />
       </div>
     </div>

@@ -10,12 +10,18 @@ export function AddToItineraryButton({
   placeName,
   municipalitySlug,
   municipalityName,
+  latitude,
+  longitude,
+  address,
   className = 'button button-glass',
 }: {
   placeId: string;
   placeName: string;
   municipalitySlug: string;
   municipalityName: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  address?: string;
   className?: string;
 }) {
   const router = useRouter();
@@ -31,6 +37,9 @@ export function AddToItineraryButton({
           record_id: placeId,
           official_name: placeName,
           verification_status: 'verified',
+          latitude,
+          longitude,
+          address,
         },
       ],
       travelerCount: 2,

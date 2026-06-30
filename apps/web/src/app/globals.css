@@ -775,6 +775,122 @@ main {
   font-size: 2rem;
 }
 
+.location-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.trip-itinerary {
+  margin-top: 1.25rem;
+}
+
+.trip-itinerary__route {
+  margin-bottom: 1rem;
+}
+
+.trip-itinerary__hint {
+  margin: 0.5rem 0 0;
+  color: var(--madia-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.trip-itinerary__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.trip-itinerary__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+}
+
+.trip-itinerary__item-head {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  flex: 1 1 12rem;
+}
+
+.trip-itinerary__step {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  color: var(--madia-forest);
+  line-height: 1;
+}
+
+.trip-itinerary__time {
+  margin: 0 0 0.2rem;
+  color: var(--madia-muted);
+  font-size: 0.82rem;
+}
+
+.trip-itinerary__name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--madia-forest-deep);
+}
+
+.trip-itinerary__address {
+  margin: 0.25rem 0 0;
+  color: var(--madia-muted);
+  font-size: 0.88rem;
+}
+
+.waze-button {
+  background: linear-gradient(135deg, #33ccff 0%, #0099ff 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.waze-button:hover {
+  filter: brightness(1.05);
+}
+
+.waze-button--compact {
+  flex: 0 0 auto;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.88rem;
+}
+
+.trips-page {
+  max-width: 52rem;
+}
+
+.trips-list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.trips-card {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.trips-card__meta {
+  color: var(--madia-muted);
+  margin: 0.35rem 0 0.75rem;
+}
+
+.trips-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

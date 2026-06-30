@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
+import { TripItineraryView, type TripItineraryItem } from '@/components/TripItineraryView';
 import { getSharedTrip } from '@/lib/persistence';
+import { wazeRouteLink, wazeStopFromTripItem } from '@/lib/waze';
 
 export default async function SharedTripPage({
   params,
@@ -11,28 +13,38 @@ export default async function SharedTripPage({
   if (!trip) notFound();
 
   const payload = trip.payload as {
-    itinerary?: { days?: Array<{ items?: Array<{ place_name: string; start_time?: string; end_time?: string }> }> };
+    itinerary?: { days?: Array<{ items?: TripItineraryItem[] }> };
     budget?: { total_php?: number };
   };
 
+  const items = payload.itinerary?.days?.[0]?.items ?? [];
+  const routeLink = wazeRouteLink(items.map((item) => wazeStopFromTripItem(item)));
+
   return (
-    <div style={{ padding: '0.75rem 1rem 2rem', maxWidth: '720px', margin: '0 auto' }}>
-      <h1 className="madia-brand">{trip.title}</h1>
+    <div className="trips-page content-section">
+      <h1 className="madia-brand section-title">{trip.title}</h1>
       <p>{trip.traveler_count} traveler(s)</p>
       {trip.total_estimated_cost_php !== undefined && (
         <p>Estimated total: ₱{trip.total_estimated_cost_php.toLocaleString('en-PH')}</p>
       )}
 
-      <section className="madia-glass" style={{ padding: '1rem', marginTop: '1rem' }}>
+      <section className="madia-glass trips-card" style={{ marginTop: '1rem' }}>
         <h2>Itinerary</h2>
-        <ol>
-          {payload.itinerary?.days?.[0]?.items?.map((item, i) => (
-            <li key={i}>
-              {item.start_time && item.end_time ? `${item.start_time}–${item.end_time}: ` : ''}
-              {item.place_name}
-            </li>
-          )) || <li>Itinerary details not available.</li>}
-        </ol>
+        {items.length > 0 ? (
+          <TripItineraryView
+            items={items}
+            municipalityName={items[0]?.municipality_slug?.replace(/-/g, ' ')}
+          />
+        ) : (
+          <p>Itinerary details not available.</p>
+        )}
+        {routeLink && (
+          <p style={{ marginTop: '0.75rem' }}>
+            <a href={routeLink} target="_blank" rel="noopener noreferrer" className="button button-primary waze-button">
+              Start route in Waze
+            </a>
+          </p>
+        )}
       </section>
     </div>
   );

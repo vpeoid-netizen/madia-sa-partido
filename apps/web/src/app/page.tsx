@@ -8,6 +8,7 @@ import { loadGeoJson, loadRuntimeData, publicText } from '@/lib/data';
 import { getMunicipalityImage, getPlaceImage } from '@/lib/images';
 import { buildHomeSectionsData } from '@/lib/home-sections';
 import { PROVINCIAL_FALLBACK } from '@/lib/image-utils';
+import { parseCoordinate } from '@madia/domain';
 
 const MUNICIPALITY_SLUG_BY_ID = Object.fromEntries(
   Object.entries(MUNICIPALITY_BY_SLUG).map(([slug, info]) => [info.id, slug]),
@@ -45,6 +46,8 @@ export default function HomePage() {
         municipality: municipalityName,
         municipalitySlug,
         address,
+        latitude: parseCoordinate(place.latitude),
+        longitude: parseCoordinate(place.longitude),
         type: type || 'Tourist Attraction',
         description:
           description ||

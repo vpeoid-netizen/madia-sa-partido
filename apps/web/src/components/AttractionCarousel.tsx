@@ -10,6 +10,8 @@ export interface AttractionSlide {
   municipality: string;
   municipalitySlug: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   type: string;
   description: string;
   route: string;
@@ -113,6 +115,9 @@ export function AttractionCarousel({ slides }: { slides: AttractionSlide[] }) {
             placeName={current.name}
             municipalitySlug={current.municipalitySlug}
             municipalityName={current.municipality}
+            latitude={current.latitude}
+            longitude={current.longitude}
+            address={current.address}
           />
         </div>
         {current.imageAttribution && (

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { calculateTripBudget, createSampleItinerary } from '@madia/domain';
+import { TripItineraryView } from '@/components/TripItineraryView';
 import { useSavedTrips } from '@/lib/client-storage';
 
 interface PlaceRef {
@@ -9,6 +10,9 @@ interface PlaceRef {
   official_name: string;
   verification_status: string;
   entrance_fee?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  address?: string;
 }
 
 export function TripBuilderPanel({
@@ -49,6 +53,8 @@ export function TripBuilderPanel({
     [itinerary, travelerCount, fees],
   );
 
+  const items = itinerary.days[0]?.items ?? [];
+
   function handleSave() {
     saveTrip({
       id: itinerary.id,
@@ -66,6 +72,10 @@ export function TripBuilderPanel({
     <section className="madia-glass detail-panel" aria-labelledby="trip-heading">
       <p className="section-kicker">Itinerary assistant</p>
       <h2 id="trip-heading">Plan your visit</h2>
+      <p className="section-lead" style={{ marginTop: 0 }}>
+        Build a day plan, then open each stop in Waze for turn-by-turn directions across Partido.
+      </p>
+
       <label>
         Travelers
         <input
@@ -78,13 +88,7 @@ export function TripBuilderPanel({
         />
       </label>
 
-      <ol style={{ marginTop: '1rem', lineHeight: 1.8 }}>
-        {itinerary.days[0]?.items.map((item) => (
-          <li key={item.id}>
-            {item.start_time}–{item.end_time}: {item.place_name}
-          </li>
-        ))}
-      </ol>
+      <TripItineraryView items={items} municipalityName={municipalityName} />
 
       <div style={{ marginTop: '1rem' }}>
         <h3>Estimated trip cost</h3>
