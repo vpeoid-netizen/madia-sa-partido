@@ -58,12 +58,14 @@ export default function TripsPage() {
       <TripPlannerForm
         onPlan={(result) => {
           setPlanned(result);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          requestAnimationFrame(() => {
+            document.getElementById('planned-trip-result')?.scrollIntoView({ behavior: 'smooth' });
+          });
         }}
       />
 
       {planned && (
-        <div style={{ marginTop: '1.5rem' }}>
+        <div id="planned-trip-result" style={{ marginTop: '1.5rem' }}>
           <PlannedTripView result={planned} />
         </div>
       )}
