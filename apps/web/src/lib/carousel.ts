@@ -1,6 +1,6 @@
 import type { Place } from '@madia/domain';
 import { MUNICIPALITY_BY_SLUG, type MunicipalitySlug } from '@madia/domain';
-import { getPublicPhoto, loadRuntimeData, placeSlugFromRoute } from './data';
+import { getPublicPhoto, loadRuntimeData, placeSlugFromRoute, publicBarangay, publicText } from './data';
 import { getCarouselOverrides } from './persistence';
 import { getMunicipalityImage, assignUniquePlaceImages, getPlaceImage, placeImageLookupKey } from './images';
 
@@ -93,9 +93,9 @@ export function buildCarouselSlides(): CarouselSlide[] {
       municipality_id: place.municipality_id,
       destination_name: place.official_name,
       municipality_name: place.municipality || slug,
-      barangay_name: place.barangay || undefined,
+      barangay_name: publicBarangay(place.barangay) || undefined,
       destination_slug: placeSlug,
-      short_caption: place.short_description || undefined,
+      short_caption: publicText(place.short_description) || undefined,
       experience_type: place.category || 'Destination',
       display_order: index + 1,
       destination_page_route: route,

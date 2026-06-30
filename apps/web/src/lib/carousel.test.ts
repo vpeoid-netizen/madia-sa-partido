@@ -13,5 +13,6 @@ describe('buildCarouselSlides', () => {
     const slides = buildCarouselSlides();
     expect(slides.length).toBe(attractionCount);
     expect(slides.every((s) => s.destination_name && s.destination_page_route)).toBe(true);
+    expect(slides.every((s) => !s.barangay_name?.toLowerCase().includes('not publicly'))).toBe(true);
   });
 });

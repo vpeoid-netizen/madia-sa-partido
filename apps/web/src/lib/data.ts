@@ -7,6 +7,8 @@ import type { PartidoFeatureCollection } from '@madia/maps';
 const ROOT = join(process.cwd(), '../..');
 const HIDDEN_PUBLIC_VALUES = [
   'not publicly available',
+  'not publicly confirmed',
+  'not publicly recorded',
   'information not yet available',
   'requires confirmation',
   'requires local confirmation',
@@ -65,6 +67,33 @@ export function publicText(value?: string | null): string {
 
 export function hasPublicValue(value?: string | null): boolean {
   return Boolean(publicText(value));
+}
+
+export function publicBarangay(value?: string | null): string {
+  const text = publicText(value);
+  if (!text) return '';
+  const lower = text.toLowerCase();
+  if (
+    lower.includes('not publicly') ||
+    lower.includes('requires confirmation') ||
+    lower.includes('requires local confirmation') ||
+    lower.includes('information not yet')
+  ) {
+    return '';
+  }
+  return text;
+}
+
+export function formatPlaceLocation(input: {
+  barangay?: string | null;
+  municipality?: string | null;
+  province?: string;
+  completeAddress?: string | null;
+}): string {
+  const province = input.province || 'Camarines Sur';
+  const address = publicText(input.completeAddress);
+  if (address) return address;
+  return [publicBarangay(input.barangay), input.municipality, province].filter(Boolean).join(', ');
 }
 
 export function loadRuntimeData(): RuntimeData | null {

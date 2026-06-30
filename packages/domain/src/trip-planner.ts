@@ -56,9 +56,28 @@ function placeSlug(place: Place): string {
   return SLUG_BY_MUNICIPALITY_ID[place.municipality_id] || 'partido';
 }
 
+function publicBarangay(value?: string): string | undefined {
+  const text = (value || '').trim();
+  if (!text) return undefined;
+  const lower = text.toLowerCase();
+  if (
+    lower.includes('not publicly') ||
+    lower.includes('requires confirmation') ||
+    lower.includes('requires local confirmation') ||
+    lower.includes('information not yet')
+  ) {
+    return undefined;
+  }
+  return text;
+}
+
 function placeAddress(place: Place): string | undefined {
-  const barangay = place.barangay?.trim();
-  const parts = [place.complete_address, barangay, place.municipality, 'Camarines Sur'].filter(Boolean);
+  const complete = (place.complete_address || '').trim();
+  if (complete && !complete.toLowerCase().includes('not publicly')) {
+    return complete;
+  }
+  const barangay = publicBarangay(place.barangay);
+  const parts = [barangay, place.municipality, 'Camarines Sur'].filter(Boolean);
   const joined = parts.join(', ').trim();
   return joined || undefined;
 }

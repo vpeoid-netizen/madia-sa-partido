@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { searchPlaces } from '@madia/domain';
-import { loadRuntimeData, publicText } from '@/lib/data';
+import { loadRuntimeData, formatPlaceLocation, publicText } from '@/lib/data';
 import { getPlaceImage } from '@/lib/images';
 
 export async function GET(request: Request) {
@@ -20,9 +20,11 @@ export async function GET(request: Request) {
         category: publicText(place.category),
         subcategory: publicText(place.subcategory),
         short_description: publicText(place.short_description),
-        complete_address:
-          publicText(place.complete_address) ||
-          [publicText(place.barangay), place.municipality, 'Camarines Sur'].filter(Boolean).join(', '),
+        complete_address: formatPlaceLocation({
+          barangay: place.barangay,
+          municipality: place.municipality,
+          completeAddress: place.complete_address,
+        }),
         application_page_route: place.application_page_route,
         image_url: image.url,
         image_attribution: image.attribution,

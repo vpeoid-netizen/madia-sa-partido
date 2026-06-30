@@ -4,7 +4,7 @@ import { AttractionCarousel, type AttractionSlide } from '@/components/Attractio
 import { HomeSections } from '@/components/HomeSections';
 import { MadiaImage } from '@/components/MadiaImage';
 import { PartidoMap } from '@/components/PartidoMap';
-import { loadGeoJson, loadRuntimeData, publicText } from '@/lib/data';
+import { loadGeoJson, loadRuntimeData, formatPlaceLocation, publicText } from '@/lib/data';
 import { getMunicipalityImage, assignUniquePlaceImages, placeImageLookupKey } from '@/lib/images';
 import { buildHomeSectionsData } from '@/lib/home-sections';
 import { PROVINCIAL_FALLBACK } from '@/lib/image-utils';
@@ -39,10 +39,11 @@ export default function HomePage() {
 
   const slides: AttractionSlide[] = attractionPlaces.map((place) => {
       const image = attractionImages.get(placeImageLookupKey(place))!;
-      const barangay = publicText(place.barangay);
-      const address =
-        publicText(place.complete_address) ||
-        [barangay, place.municipality, 'Camarines Sur'].filter(Boolean).join(', ');
+      const address = formatPlaceLocation({
+        barangay: place.barangay,
+        municipality: place.municipality,
+        completeAddress: place.complete_address,
+      });
       const description = publicText(place.short_description) || publicText(place.full_description);
       const type = [publicText(place.category), publicText(place.subcategory)].filter(Boolean).join(' · ');
       const municipalityName = place.municipality || 'Partido';

@@ -12,6 +12,7 @@ import {
   getMunicipalityBySlug,
   getPlaceBySlug,
   getPlacesForMunicipality,
+  formatPlaceLocation,
   publicText,
 } from '@/lib/data';
 import { getPlaceGallery, getPlaceImage } from '@/lib/images';
@@ -46,11 +47,11 @@ export default async function PlacePage({
   const municipalityPlaces = getPlacesForMunicipality(municipality.meta.id);
   const lat = parseCoordinate(place.latitude);
   const lng = parseCoordinate(place.longitude);
-  const address =
-    publicText(place.complete_address) ||
-    [publicText(place.barangay), municipalityName, 'Camarines Sur']
-      .filter(Boolean)
-      .join(', ');
+  const address = formatPlaceLocation({
+    barangay: place.barangay,
+    municipality: municipalityName,
+    completeAddress: place.complete_address,
+  });
   const overview = publicText(place.full_description) || publicText(place.short_description);
   const fee = publicText(place.entrance_fee) || publicText(place.price_range);
   const visitDuration = publicText(place.recommended_visit_duration);
@@ -70,11 +71,11 @@ export default async function PlacePage({
   function placeRef(item: (typeof municipalityPlaces)[number]) {
     const itemLat = parseCoordinate(item.latitude);
     const itemLng = parseCoordinate(item.longitude);
-    const itemAddress =
-      publicText(item.complete_address) ||
-      [publicText(item.barangay), municipalityName, 'Camarines Sur']
-        .filter(Boolean)
-        .join(', ');
+    const itemAddress = formatPlaceLocation({
+      barangay: item.barangay,
+      municipality: municipalityName,
+      completeAddress: item.complete_address,
+    });
 
     return {
       record_id: item.record_id,

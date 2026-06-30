@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Place } from '@madia/domain';
 import { MadiaImage } from '@/components/MadiaImage';
 import { assignUniquePlaceImages, placeImageLookupKey } from '@/lib/images';
+import { formatPlaceLocation, publicText } from '@/lib/data';
 
 function RelatedList({
   title,
@@ -22,8 +23,12 @@ function RelatedList({
         {places.map((p) => {
           const image = imageMap.get(placeImageLookupKey(p))!;
           const description =
-            p.short_description ||
-            p.complete_address ||
+            publicText(p.short_description) ||
+            formatPlaceLocation({
+              barangay: p.barangay,
+              municipality: p.municipality,
+              completeAddress: p.complete_address,
+            }) ||
             `${p.municipality || 'Partido'}, Camarines Sur`;
           const ctaHref =
             p.application_page_route ||
