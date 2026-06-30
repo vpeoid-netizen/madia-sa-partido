@@ -48,7 +48,14 @@ function ensureGitRepo() {
   }
 }
 
+function removeGithubWorkflows() {
+  const workflowPath = join(ROOT, '.github', 'workflows');
+  if (!existsSync(workflowPath)) return;
+  run('git rm -r --cached .github/workflows 2>/dev/null || rm -rf .github/workflows');
+}
+
 function ensureCommit() {
+  removeGithubWorkflows();
   const status = runCapture('git status --porcelain');
   if (!status.stdout.trim()) {
     console.log('No new changes to commit.');

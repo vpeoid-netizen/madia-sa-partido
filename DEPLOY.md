@@ -12,7 +12,15 @@ npm run deploy:github
 
 It will ask for your **GitHub username** only. Everything else is automatic.
 
-First time only — install GitHub login tool:
+First time only — when Terminal asks for a **password**, paste a GitHub token (not your Mac password):
+
+1. Open [github.com/settings/tokens/new](https://github.com/settings/tokens/new?scopes=repo&description=MADIA-upload)
+2. Check **repo** only → **Generate token** → copy it (starts with `ghp_`)
+3. Username: your GitHub name · Password: paste the token
+
+If push says **"workflow scope"**, run `npm run deploy:github` again — the script no longer uploads GitHub Actions files (Vercel handles deploy).
+
+Optional — install GitHub login tool:
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
