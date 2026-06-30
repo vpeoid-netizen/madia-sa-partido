@@ -38,6 +38,24 @@ Then run `npm run deploy:github` again.
 3. Set **Root Directory** to: `apps/web`
 4. Click **Deploy** (settings are already in `vercel.json`)
 
+**Live site (current production):** [madia-sa-partido-aa-sigma.vercel.app](https://madia-sa-partido-aa-sigma.vercel.app)
+
+If an older Vercel project named `madia-sa-partido` fails to build, open **Project Settings → General** and set:
+
+| Setting | Value |
+|---------|--------|
+| Root Directory | `apps/web` |
+| Install Command | `cd ../.. && npm install --include-workspace-root` |
+| Build Command | `cd ../.. && npm run import:data && npm run build --workspace=@madia/domain --workspace=@madia/ai --workspace=@madia/maps --workspace=@madia/ui && npm run build --workspace=@madia/web` |
+
+Or run once after `npx vercel login`:
+
+```bash
+node scripts/fix-vercel-main-project.mjs
+```
+
+A wrong Root Directory (`.` instead of `apps/web`) causes `npm install` to fail and blocks deploys.
+
 ---
 
 ## 3. Optional — AI on the live site
