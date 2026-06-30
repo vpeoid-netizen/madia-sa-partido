@@ -120,6 +120,17 @@ img {
   flex-shrink: 0;
 }
 
+.site-brand__logo-surface,
+.site-footer__logo-surface {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.8rem;
+  background: var(--madia-capiz);
+  border: 1px solid rgba(31, 73, 56, 0.1);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset;
+}
+
 .site-brand__logo {
   display: block;
   height: 2.85rem;

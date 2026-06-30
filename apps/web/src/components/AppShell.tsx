@@ -18,13 +18,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="site-shell">
       <header className="site-header madia-glass">
         <Link href="/" className="site-brand" aria-label="MADIA sa Partido home">
-          <img
-            src="/images/madia-logo.png"
-            alt="MADIA sa Partido"
-            className="site-brand__logo"
-            width={1024}
-            height={341}
-          />
+          <span className="site-brand__logo-surface">
+            <img
+              src="/images/madia-logo.png"
+              alt="MADIA sa Partido"
+              className="site-brand__logo"
+              width={1080}
+              height={377}
+            />
+          </span>
         </Link>
 
         <nav aria-label="Primary" className="desktop-nav">
@@ -52,13 +54,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <footer className="site-footer">
         <div>
-          <img
-            src="/images/madia-logo.png"
-            alt="MADIA sa Partido"
-            className="site-footer__logo"
-            width={1024}
-            height={341}
-          />
+          <span className="site-footer__logo-surface">
+            <img
+              src="/images/madia-logo.png"
+              alt="MADIA sa Partido"
+              className="site-footer__logo"
+              width={1080}
+              height={377}
+            />
+          </span>
           <p>Your local guide to the destinations, culture, and communities of Partido.</p>
         </div>
         <nav aria-label="Footer">
