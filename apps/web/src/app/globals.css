@@ -114,11 +114,25 @@ img {
 
 .site-brand {
   display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
+  align-items: center;
   color: var(--madia-forest-deep);
   text-decoration: none;
-  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.site-brand__logo {
+  display: block;
+  height: 2.85rem;
+  width: auto;
+  max-width: min(240px, 54vw);
+}
+
+.site-footer__logo {
+  display: block;
+  height: 2.5rem;
+  width: auto;
+  max-width: 220px;
+  margin-bottom: 0.65rem;
 }
 
 .site-brand .madia-brand {

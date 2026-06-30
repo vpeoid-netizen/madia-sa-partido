@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     title: 'MADIA sa Partido',
     description:
       'Explore attractions and create personalized itineraries across the Partido Area of Camarines Sur.',
-    images: [{ url: '/images/madia-logo.png', width: 2172, height: 724, alt: 'MADIA sa Partido' }],
+    images: [{ url: '/images/madia-logo.png', width: 1024, height: 341, alt: 'MADIA sa Partido logo' }],
     type: 'website',
     locale: 'en_PH',
   },
