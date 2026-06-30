@@ -25,6 +25,10 @@ function PlaceCard({ place, image }: PlaceCardData) {
   const price = place.price_range || place.entrance_fee;
   const showPrice =
     price && !price.toLowerCase().includes('not publicly') && !price.toLowerCase().includes('not publicly recorded');
+  const category = place.subcategory || place.category || 'Destination';
+  const description =
+    place.short_description ||
+    (showPrice ? `${price} · ${place.municipality}` : `${place.municipality}, Camarines Sur`);
 
   return (
     <li className="home-card madia-glass">
@@ -36,11 +40,11 @@ function PlaceCard({ place, image }: PlaceCardData) {
         frameClassName="madia-image-frame card-image-frame"
       />
       <div className="home-card-body">
+        <p className="home-card-kicker">{category}</p>
         <h3>{place.official_name}</h3>
-        <p className="home-card-meta">{place.municipality} · {place.category}</p>
-        {showPrice && <p className="home-card-price">{price}</p>}
-        <Link href={slug} className="button button-primary">
-          View
+        <p className="home-card-description">{description}</p>
+        <Link href={slug} className="municipality-card__action">
+          Explore destination →
         </Link>
       </div>
     </li>
@@ -71,11 +75,14 @@ export function HomeSections({
                 frameClassName="madia-image-frame card-image-frame"
               />
               <div className="home-card-body">
+                <p className="home-card-kicker">Municipality</p>
                 <h3>{m.municipality_name}</h3>
-                <p>{m.short_description || 'Discover local destinations across Partido.'}</p>
+                <p className="home-card-description">
+                  {m.short_description || 'Discover local destinations across Partido.'}
+                </p>
                 <p className="home-card-meta">{m.attraction_count} attractions</p>
-                <Link href={m.municipality_page_route} className="button button-primary">
-                  Explore
+                <Link href={m.municipality_page_route} className="municipality-card__action">
+                  Explore destination →
                 </Link>
               </div>
             </li>

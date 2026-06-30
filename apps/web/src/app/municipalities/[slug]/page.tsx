@@ -63,7 +63,9 @@ export default async function MunicipalityPage({ params }: { params: Promise<{ s
                     {publicText(place.subcategory) || publicText(place.category) || 'Destination'}
                   </span>
                   <h3>{place.official_name}</h3>
-                  {publicText(place.short_description) && <p>{publicText(place.short_description)}</p>}
+                  {publicText(place.short_description) && (
+                    <p className="place-card__description">{publicText(place.short_description)}</p>
+                  )}
                   <span className="municipality-card__action">Explore destination →</span>
                 </div>
               </Link>

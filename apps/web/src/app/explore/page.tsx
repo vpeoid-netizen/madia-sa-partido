@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { MadiaImage } from '@/components/MadiaImage';
 
 interface PlaceResult {
   record_id: string;
@@ -12,6 +13,8 @@ interface PlaceResult {
   short_description?: string;
   complete_address?: string;
   application_page_route?: string;
+  image_url?: string;
+  image_attribution?: string;
 }
 
 export default function ExplorePage() {
@@ -66,24 +69,32 @@ export default function ExplorePage() {
       </p>
 
       <div className="place-grid">
-        {results.map((place) => (
-          <Link
-            key={place.record_id}
-            href={place.application_page_route || '/'}
-            className="place-card madia-glass"
-          >
-            <div className="place-card__scenic" aria-hidden="true" />
-            <div className="place-card__body">
-              <span className="place-card__type">
-                {place.subcategory || place.category || 'Destination'}
-              </span>
-              <h3>{place.official_name}</h3>
-              <p>{place.complete_address || `${place.municipality}, Camarines Sur`}</p>
-              {place.short_description && <p>{place.short_description}</p>}
-              <span className="municipality-card__action">Open destination →</span>
-            </div>
-          </Link>
-        ))}
+        {results.map((place) => {
+          const description = place.short_description || place.complete_address || `${place.municipality}, Camarines Sur`;
+          return (
+            <Link
+              key={place.record_id}
+              href={place.application_page_route || '/'}
+              className="place-card madia-glass"
+            >
+              <MadiaImage
+                src={place.image_url || '/images/provincial-fallback.svg'}
+                alt={place.official_name}
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                frameClassName="madia-image-frame place-card__image"
+              />
+              <div className="place-card__body">
+                <span className="place-card__type">
+                  {place.subcategory || place.category || 'Destination'}
+                </span>
+                <h3>{place.official_name}</h3>
+                <p className="place-card__description">{description}</p>
+                <span className="municipality-card__action">Explore destination →</span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

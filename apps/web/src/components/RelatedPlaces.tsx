@@ -21,6 +21,15 @@ function RelatedList({
       <ul className="home-grid">
         {places.map((p) => {
           const image = imageMap.get(placeImageLookupKey(p))!;
+          const description =
+            p.short_description ||
+            p.complete_address ||
+            `${p.municipality || 'Partido'}, Camarines Sur`;
+          const ctaHref =
+            p.application_page_route ||
+            (bookable && p.record_type === 'accommodation'
+              ? `/book?accommodation=${encodeURIComponent(p.record_id)}`
+              : null);
           return (
             <li key={p.record_id} className="home-card madia-glass">
               <MadiaImage
@@ -31,23 +40,14 @@ function RelatedList({
                 frameClassName="madia-image-frame card-image-frame"
               />
               <div className="home-card-body">
+                <p className="home-card-kicker">{p.subcategory || p.category || 'Destination'}</p>
                 <h3>{p.official_name}</h3>
-                <p className="home-card-meta">{p.category}</p>
-                <div className="home-card-actions">
-                  {p.application_page_route && (
-                    <Link href={p.application_page_route} className="button button-secondary">
-                      Details
-                    </Link>
-                  )}
-                  {bookable && p.record_type === 'accommodation' && (
-                    <Link
-                      href={`/book?accommodation=${encodeURIComponent(p.record_id)}`}
-                      className="button button-primary"
-                    >
-                      Check availability
-                    </Link>
-                  )}
-                </div>
+                <p className="home-card-description">{description}</p>
+                {ctaHref && (
+                  <Link href={ctaHref} className="municipality-card__action">
+                    Explore destination →
+                  </Link>
+                )}
               </div>
             </li>
           );

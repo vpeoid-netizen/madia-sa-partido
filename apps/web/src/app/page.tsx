@@ -132,8 +132,8 @@ export default function HomePage() {
                     {summary.attraction_count} destinations
                   </span>
                   <h3>{summary.municipality_name}</h3>
-                  <p>{publicText(summary.short_description)}</p>
-                  <span className="municipality-card__action">Explore →</span>
+                  <p className="home-card-description">{publicText(summary.short_description)}</p>
+                  <span className="municipality-card__action">Explore destination →</span>
                 </div>
               </Link>
             );
