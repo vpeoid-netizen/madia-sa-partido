@@ -1,24 +1,52 @@
-# Design System — Liquid Glass
+# MADIA Design System — Elegant Provincial Liquid Glass
 
-## Fonts
+## Brand character
 
-- **BARABARA** — wordmark, major titles, municipality names (place licensed files in `apps/web/public/fonts/`)
-- **Manrope** — body, forms, metadata, prices
+MADIA should feel calm, refined, welcoming, and rooted in Partido. The visual language combines contemporary travel-platform clarity with provincial details inspired by capiz, abaca, coastal water, forested hills, warm sand, terracotta, and local wood.
 
-## Tokens
+## Typography
 
-See `packages/ui/src/tokens.ts` for colors, glass surfaces, spacing, radius, and motion.
+- **Cormorant Garamond** — display headings, attraction names, municipality names, and branded moments
+- **Manrope** — navigation, body text, forms, metadata, prices, and utility controls
 
-## Liquid glass usage
+Both fonts are loaded through `next/font/google`. No proprietary font file is required.
 
-Apply `.madia-glass` to navigation, map controls, search, summary panels, bottom sheets, AI composer, and selected cards. Use opaque surfaces for long-form reading.
+## Color tokens
+
+- Deep forest: `#123126`
+- Forest: `#1F4938`
+- Coastal blue: `#386F78`
+- Muted terracotta: `#B8684E`
+- Antique gold: `#B08B4F`
+- Coconut cream: `#F5EFE3`
+- Capiz white: `#FFFDF7`
+- Warm sand: `#DFCEB1`
+- Ink: `#203029`
+
+## Liquid glass
+
+Use warm translucent surfaces for navigation, compact controls, itinerary panels, filters, and selected cards. Photography remains the visual focus. Avoid oversized floating panels, excessive glow, neon color, or cold blue glass.
+
+## Photography
+
+- Prefer wide, cinematic tourism photography.
+- Use `object-fit: cover` with focal-point-aware cropping.
+- Keep overlays restrained and readable.
+- Display approved attribution discreetly.
+- Use municipality-level scenic imagery when a destination-specific image is unavailable.
+
+## Motion
+
+- Carousel transitions use gentle fades or restrained movement.
+- Autoplay pauses on hover, keyboard focus, touch interaction, and reduced-motion preference.
+- All motion respects `prefers-reduced-motion`.
 
 ## Accessibility
 
-- `prefers-reduced-motion` respected globally
-- Backdrop-filter fallback to opaque white
-- `data-simplified` and `data-high-contrast` document attributes for future settings UI
-
-## i18n
-
-Prepare strings for English, Filipino, and Bikol — use a message catalog in future iteration (not hard-coded in components long term).
+- Minimum 44px touch targets
+- Visible focus states
+- Keyboard-operable carousel controls
+- Swipe support on touch screens
+- Semantic headings and landmarks
+- Text contrast maintained over imagery
+- Opaque fallback for browsers without backdrop filters

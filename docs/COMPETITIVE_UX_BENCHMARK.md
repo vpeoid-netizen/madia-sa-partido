@@ -1,38 +1,28 @@
-# Competitive UX Benchmark — MADIA sa Partido
+# Competitive UX Direction — MADIA sa Partido
 
-Review date: 2026-06-29
+MADIA combines the strongest discovery patterns of leading travel platforms with a distinct destination-first identity for Partido.
 
-## Applications reviewed
+| Reference | Pattern adopted for MADIA |
+|---|---|
+| Airbnb | Immersive photography, clean cards, strong destination hierarchy, saved-trip behavior |
+| Agoda | Clear location information, visitor details, responsive search, travel-planning actions |
+| Google Maps | Map/list coordination, direct location actions, municipality discovery |
+| Tripadvisor | Rich destination profiles and category browsing |
+| Wanderlog | Day-by-day itinerary structure, destination sequencing, trip budget support |
 
-| Application | Journeys reviewed | Strong patterns | Problems to avoid |
-|---|---|---|---|
-| Google Maps | Municipality discovery, place details, directions | Clear map/list sync, strong search suggestions, visible attribution | Generic content without local verification |
-| Airbnb | Filters, photography, saved lists | Clean filter chips, trustworthy price labeling | Commercial ranking opaque to users |
-| Tripadvisor | Reviews, destination pages | Rich place detail hierarchy | Mixed verification quality |
-| Wanderlog | Itinerary building, map of stops, budgeting | Day-by-day structure, map of itinerary | Can assume costs without sources |
+## MADIA's differentiated experience
 
-## MADIA advantages
+- A cinematic carousel containing all attractions and cultural destinations
+- Every slide shows the destination's name, address, type, municipality, and concise description
+- Elegant provincial styling inspired by Partido rather than a generic global-travel theme
+- Ten-municipality discovery supported by an interactive map
+- An itinerary assistant designed around local travel routes and visitor interests
+- Integrated destinations, culture, food, stays, services, and trip planning in one application
 
-- Municipality-first Partido map with accessible list alternative
-- Verification status, source, and freshness on records
-- Grounded AI that refuses to invent missing fees or schedules
-- Integrated transportation and local directories from one repository
-- Age-inclusive controls and simplified mode architecture
+## Quality principles
 
-## Adopted decisions
-
-- Map-first landing without hero banner above map
-- First mobile tap selects municipality; explicit Explore action navigates
-- Verification badges with non-color cues (labels + borders)
-- Budget lines separate verified amounts from unavailable fees
-
-## Gaps for future releases
-
-- Live routing and travel-time estimates
-- Collaborative trip editing
-- Full admin dashboard UI
-- Native mobile parity and offline cache
-
-## Rationale
-
-MADIA competes on trust and local completeness within Partido, not on copying global app chrome. Patterns are adapted where they improve task completion for first-time and older users.
+- Photography leads; glass supports rather than obscures it.
+- Public content reads naturally and confidently.
+- Mobile interaction is first-class, including swipe, touch targets, and bottom navigation.
+- Every visible action works.
+- Search, detail pages, maps, AI, and itineraries share the same public data contract.

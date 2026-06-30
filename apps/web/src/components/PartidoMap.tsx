@@ -9,11 +9,10 @@ import { MunicipalitySummaryPanel } from './MunicipalitySummaryPanel';
 interface PartidoMapProps {
   geojson: PartidoFeatureCollection;
   summaries: MunicipalityMapSummary[];
-  summaryImages?: Record<string, { url: string; attribution?: string }>;
   lowBandwidth?: boolean;
 }
 
-export function PartidoMap({ geojson, summaries, summaryImages = {}, lowBandwidth = false }: PartidoMapProps) {
+export function PartidoMap({ geojson, summaries, lowBandwidth = false }: PartidoMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MaplibreMap | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
@@ -83,7 +82,7 @@ export function PartidoMap({ geojson, summaries, summaryImages = {}, lowBandwidt
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     if (!geojson.features.length) {
-      setMapError('Boundary data is not yet available. Use the municipality list below.');
+      setMapError('Explore Partido through the municipality directory below.');
       return;
     }
 
@@ -230,11 +229,10 @@ export function PartidoMap({ geojson, summaries, summaryImages = {}, lowBandwidt
       >
         <div>
           <h1 className="madia-brand" style={{ margin: 0, fontSize: '1.6rem' }}>
-            Choose where you want to go in Partido
+            Explore the municipalities of Partido
           </h1>
           <p style={{ margin: '0.35rem 0 0', maxWidth: '48rem' }}>
-            Tap or choose a municipality on the map, or use the searchable list. The first tap
-            selects a municipality; use Explore Municipality to open its profile.
+            Choose a municipality on the map or use the searchable list to discover its destinations.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -284,7 +282,7 @@ export function PartidoMap({ geojson, summaries, summaryImages = {}, lowBandwidt
           />
           {!mapReady && !mapError && (
             <p aria-live="polite" style={{ marginTop: '0.5rem' }}>
-              Loading map boundaries…
+              Opening the Partido map…
             </p>
           )}
           {mapError && (
@@ -297,7 +295,7 @@ export function PartidoMap({ geojson, summaries, summaryImages = {}, lowBandwidt
 
         <aside aria-label="Municipality selection">
           <div className="madia-glass" style={{ padding: '0.85rem' }}>
-            <h2 style={{ marginTop: 0, fontSize: '1rem' }}>All municipalities</h2>
+            <h2 style={{ marginTop: 0, fontSize: '1rem' }}>Municipalities</h2>
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.35rem' }}>
               {filteredList.map((m) => (
                 <li key={m.municipality_slug}>
@@ -329,11 +327,7 @@ export function PartidoMap({ geojson, summaries, summaryImages = {}, lowBandwidt
 
           {selectedSummary && (
             <div style={{ marginTop: '0.75rem' }}>
-              <MunicipalitySummaryPanel
-                summary={selectedSummary}
-                imageUrl={summaryImages[selectedSummary.municipality_slug]?.url}
-                imageAttribution={summaryImages[selectedSummary.municipality_slug]?.attribution}
-              />
+              <MunicipalitySummaryPanel summary={selectedSummary} />
             </div>
           )}
         </aside>

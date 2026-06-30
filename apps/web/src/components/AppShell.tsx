@@ -1,67 +1,35 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const NAV = [
   { href: '/', label: 'Home' },
-  { href: '/map', label: 'Map' },
-  { href: '/explore', label: 'Explore' },
-  { href: '/trips', label: 'Trips' },
-  { href: '/ai', label: 'AI' },
-  { href: '/contribute', label: 'Contribute' },
-  { href: '/account', label: 'Account' },
+  { href: '/explore', label: 'Destinations' },
+  { href: '/#map', label: 'Map' },
+  { href: '/trips', label: 'Plan a Trip' },
+  { href: '/ai', label: 'AI Assistant' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <header
-        className="madia-glass site-header"
-        style={{
-          margin: '0.75rem',
-          padding: '0.75rem 1rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          position: 'sticky',
-          top: '0.75rem',
-          zIndex: 20,
-        }}
-      >
-        <Link href="/" className="site-brand" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <Image
-            src="/images/madia-logo.png"
-            alt="MADIA sa Partido"
-            width={220}
-            height={73}
-            priority
-            className="site-logo"
-          />
-          <span className="sr-only">MADIA sa Partido — Mixed-Reality AI Destination and Itinerary Assistant</span>
+    <div className="site-shell">
+      <header className="site-header madia-glass">
+        <Link href="/" className="site-brand" aria-label="MADIA sa Partido home">
+          <span className="madia-brand">MADIA</span>
+          <small>sa Partido</small>
         </Link>
+
         <nav aria-label="Primary" className="desktop-nav">
-          <ul
-            style={{
-              display: 'flex',
-              gap: '0.5rem',
-              listStyle: 'none',
-              margin: 0,
-              padding: 0,
-              flexWrap: 'wrap',
-            }}
-          >
+          <ul>
             {NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   aria-current={pathname === item.href ? 'page' : undefined}
-                  className="button button-secondary"
-                  style={{ minHeight: '2.5rem', padding: '0.4rem 0.75rem' }}
+                  className={pathname === item.href ? 'nav-link nav-link--active' : 'nav-link'}
                 >
                   {item.label}
                 </Link>
@@ -69,74 +37,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
           </ul>
         </nav>
+
+        <Link href="/trips" className="button button-primary site-header__cta">
+          Build itinerary
+        </Link>
       </header>
 
-      <main style={{ flex: 1, minHeight: 0 }}>{children}</main>
+      <main>{children}</main>
 
-      <nav
-        aria-label="Mobile primary"
-        className="mobile-nav madia-glass"
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: 'none',
-          padding: '0.5rem',
-          zIndex: 30,
-        }}
-      >
-        <ul
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-            gap: '0.25rem',
-            listStyle: 'none',
-            margin: 0,
-            padding: 0,
-          }}
-        >
+      <footer className="site-footer">
+        <div>
+          <span className="madia-brand">MADIA sa Partido</span>
+          <p>Your local guide to the destinations, culture, and communities of Partido.</p>
+        </div>
+        <nav aria-label="Footer">
+          <Link href="/explore">Destinations</Link>
+          <Link href="/#map">Map</Link>
+          <Link href="/trips">Trips</Link>
+          <Link href="/ai">AI Assistant</Link>
+        </nav>
+      </footer>
+
+      <nav aria-label="Mobile primary" className="mobile-nav madia-glass">
+        <ul>
           {NAV.map((item) => (
             <li key={item.href}>
-              <Link
-                href={item.href}
-                aria-current={pathname === item.href ? 'page' : undefined}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: 'var(--madia-touch-min)',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  fontSize: '0.72rem',
-                  fontWeight: pathname === item.href ? 700 : 500,
-                }}
-              >
+              <Link href={item.href} aria-current={pathname === item.href ? 'page' : undefined}>
                 {item.label}
               </Link>
             </li>
           ))}
         </ul>
       </nav>
-
-      <style jsx global>{`
-        @media (max-width: 900px) {
-          .desktop-nav {
-            display: none;
-          }
-          .mobile-nav {
-            display: block !important;
-          }
-          main {
-            padding-bottom: 5rem;
-          }
-          .site-logo {
-            width: min(58vw, 200px) !important;
-            height: auto !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

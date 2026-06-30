@@ -27,10 +27,7 @@ export function TripBuilderPanel({
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   const itinerary = useMemo(() => {
-    const selected = [
-      focusPlace,
-      ...places.filter((p) => p.record_id !== focusPlace.record_id).slice(0, 2),
-    ];
+    const selected = [focusPlace, ...places.filter((place) => place.record_id !== focusPlace.record_id).slice(0, 2)];
     return createSampleItinerary({
       title: `${municipalityName} day trip`,
       municipalitySlug,
@@ -41,8 +38,8 @@ export function TripBuilderPanel({
 
   const fees = useMemo(() => {
     const map: Record<string, string | undefined> = {};
-    [focusPlace, ...places].forEach((p) => {
-      map[p.record_id] = p.entrance_fee;
+    [focusPlace, ...places].forEach((place) => {
+      map[place.record_id] = place.entrance_fee;
     });
     return map;
   }, [focusPlace, places]);
@@ -62,12 +59,13 @@ export function TripBuilderPanel({
       updated_at: new Date().toISOString(),
       payload: { itinerary, budget },
     });
-    setSavedMessage('Trip saved on this device.');
+    setSavedMessage('Your Partido itinerary has been saved on this device.');
   }
 
   return (
-    <section className="madia-glass" aria-labelledby="trip-heading" style={{ padding: '1rem' }}>
-      <h2 id="trip-heading">Plan and budget</h2>
+    <section className="madia-glass detail-panel" aria-labelledby="trip-heading">
+      <p className="section-kicker">Itinerary assistant</p>
+      <h2 id="trip-heading">Plan your visit</h2>
       <label>
         Travelers
         <input
@@ -75,12 +73,12 @@ export function TripBuilderPanel({
           min={1}
           max={20}
           value={travelerCount}
-          onChange={(e) => setTravelerCount(Number(e.target.value) || 1)}
+          onChange={(event) => setTravelerCount(Number(event.target.value) || 1)}
           style={{ marginLeft: '0.5rem', minHeight: '2.5rem', width: '5rem' }}
         />
       </label>
 
-      <ol style={{ marginTop: '0.75rem' }}>
+      <ol style={{ marginTop: '1rem', lineHeight: 1.8 }}>
         {itinerary.days[0]?.items.map((item) => (
           <li key={item.id}>
             {item.start_time}–{item.end_time}: {item.place_name}
@@ -88,16 +86,13 @@ export function TripBuilderPanel({
         ))}
       </ol>
 
-      <div style={{ marginTop: '0.75rem' }}>
-        <h3>Estimated budget (PHP)</h3>
-        {budget.line_items.length === 0 ? (
-          <p className="empty-state">No verified fee amounts available to total yet.</p>
-        ) : (
+      <div style={{ marginTop: '1rem' }}>
+        <h3>Estimated trip cost</h3>
+        {budget.line_items.length > 0 && (
           <ul>
             {budget.line_items.map((line) => (
               <li key={line.label}>
                 {line.label}: ₱{line.amount_php.toLocaleString('en-PH')}
-                {line.source_note ? ` (${line.source_note})` : ''}
               </li>
             ))}
           </ul>
@@ -106,21 +101,15 @@ export function TripBuilderPanel({
           <strong>Total estimate:</strong> ₱{budget.total_php.toLocaleString('en-PH')} for{' '}
           {travelerCount} traveler(s)
         </p>
-        <ul style={{ fontSize: '0.85rem' }}>
-          {budget.assumptions.map((a) => (
-            <li key={a}>{a}</li>
-          ))}
-        </ul>
+        <p style={{ color: 'var(--madia-muted)', fontSize: '0.88rem' }}>
+          Final transportation, meal, activity, and seasonal costs may vary by travel date.
+        </p>
       </div>
 
       <button type="button" className="button button-primary" onClick={handleSave}>
-        Save trip
+        Save itinerary
       </button>
-      {savedMessage && (
-        <p role="status" style={{ marginTop: '0.5rem' }}>
-          {savedMessage}
-        </p>
-      )}
+      {savedMessage && <p role="status">{savedMessage}</p>}
     </section>
   );
 }

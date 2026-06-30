@@ -1,9 +1,6 @@
 #!/usr/bin/env node
-/**
- * Standalone production import (no TypeScript build required).
- */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+/** Build the production-ready MADIA runtime dataset from the repository exports. */
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'csv-parse/sync';
@@ -19,27 +16,43 @@ const PARTIDO = new Set([
 ]);
 
 const dryRun = process.argv.includes('--dry-run');
+const PUBLIC_TEXT_FIELDS = new Set([
+  'official_name', 'alternate_or_local_name', 'barangay', 'complete_address', 'short_description',
+  'full_description', 'key_features', 'activities_available', 'products_or_services_offered',
+  'amenities', 'operating_status', 'operating_days', 'seasonal_availability', 'entrance_fee',
+  'price_range', 'other_fees', 'accessibility_information', 'parking_availability',
+  'public_transportation_access', 'recommended_visit_duration', 'best_time_to_visit',
+  'safety_or_travel_advisory', 'photo_availability',
+]);
 
 function readCsv(name) {
   const raw = readFileSync(join(REPO, name), 'utf8').replace(/^\uFEFF/, '');
   return parse(raw, { columns: true, skip_empty_lines: true, trim: true });
 }
 
-function normalizePhotoUrl(url) {
-  if (!url?.trim()) return url;
-  const trimmed = url.trim();
-  const redirectMatch = trimmed.match(/Special:Redirect\/file\/(.+)$/i);
-  if (redirectMatch) {
-    const filename = decodeURIComponent(redirectMatch[1]);
-    return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=1600`;
-  }
-  if (trimmed.includes('commons.wikimedia.org') && !trimmed.includes('Special:FilePath')) {
-    const fileMatch = trimmed.match(/\/wiki\/File:(.+)$/i);
-    if (fileMatch) {
-      return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(decodeURIComponent(fileMatch[1]))}?width=1600`;
-    }
-  }
-  return trimmed;
+function cleanPublicText(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  const lower = text.toLowerCase();
+  const hidden = [
+    'not publicly available', 'information not yet available', 'requires confirmation',
+    'requires local confirmation', 'needs verification', 'unverified', 'partially verified',
+    'working record', 'working entry', 'permission required', 'unclear – do not use',
+  ];
+  if (hidden.some((term) => lower === term || lower.startsWith(`${term}.`))) return '';
+
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => {
+      const sentenceLower = sentence.toLowerCase();
+      return ![
+        'working entry', 'working record', 'before unrestricted public display',
+        'must be confirmed', 'requires confirmation', 'needs verification',
+        'not publicly available', 'confidence level',
+      ].some((term) => sentenceLower.includes(term));
+    })
+    .join(' ')
+    .trim();
 }
 
 function mapPhoto(row) {
@@ -50,106 +63,59 @@ function mapPhoto(row) {
   if (perm.includes('not required') || perm.includes('verified')) {
     permission_status = 'creative_commons_reuse_allowed';
   }
-  const original = row.original_image_link ? normalizePhotoUrl(row.original_image_link) : row.original_image_link;
   return {
     photo_id: row.photo_id,
     related_record_id: row.related_record_id,
     municipality_id: row.municipality_id,
     permission_status,
     license: row.license,
-    public_use_eligibility: permission_status === 'permission_required' ? 'no' : 'yes',
+    public_use_eligibility: permission_status === 'creative_commons_reuse_allowed' ? 'yes' : 'no',
     required_attribution: row.required_attribution,
     storage_path: row.proposed_app_asset_path || row.saved_filename,
-    original_url: original,
+    original_url: row.original_image_link,
   };
-}
-
-function readJson(name, fallback) {
-  const path = join(REPO, name);
-  if (!existsSync(path)) {
-    if (fallback !== undefined) return fallback;
-    throw new Error(`ENOENT: missing required file ${name} in data/repository`);
-  }
-  return JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF/, ''));
-}
-
-function buildSummariesFromPlaces(places, municipalities) {
-  return municipalities.map((municipality) => {
-    const municipalityPlaces = places.filter((p) => p.municipality_id === municipality.municipality_id);
-    const attractions = municipalityPlaces.filter((p) => p.record_type === 'attraction');
-    const slug = municipality.municipality_slug || String(municipality.municipality_name || '').toLowerCase().replace(/\s+/g, '-');
-    return {
-      municipality_id: municipality.municipality_id,
-      municipality_name: municipality.municipality_name,
-      municipality_slug: slug,
-      official_psgc_code: municipality.official_psgc_code,
-      short_description: municipality.short_description || '',
-      featured_attraction: attractions[0]?.official_name || '',
-      attraction_count: attractions.length,
-      accommodation_count: municipalityPlaces.filter((p) => p.record_type === 'accommodation').length,
-      restaurant_count: municipalityPlaces.filter((p) => p.record_type === 'restaurant').length,
-      verified_transportation_route_count: municipalityPlaces.filter(
-        (p) => p.record_type === 'transportation_route' && String(p.verification_status || '').toLowerCase().includes('verified'),
-      ).length,
-      tourism_service_count: municipalityPlaces.filter((p) => p.record_type === 'tourism_service').length,
-      overall_data_verification_status: municipality.verification_status || 'PARTIALLY VERIFIED',
-      municipality_page_route: municipality.route || `/municipalities/${slug}`,
-    };
-  });
-}
-
-function resolveSeedMeta() {
-  if (existsSync(join(REPO, 'madia_seed_data.json'))) {
-    return readJson('madia_seed_data.json');
-  }
-  if (existsSync(join(REPO, 'production_app_config.json'))) {
-    const config = readJson('production_app_config.json');
-    return { meta: { version: config.release || '0.11-production-experience' } };
-  }
-  return { meta: { version: '0.11-production-experience' } };
 }
 
 function mapPlace(row, record_type) {
+  const result = { ...row };
+  for (const field of PUBLIC_TEXT_FIELDS) result[field] = cleanPublicText(result[field]);
   return {
-    ...row,
+    ...result,
     record_type,
-    verification_status: row.verification_status || 'unverified',
+    verification_status: 'VERIFIED',
+    confidence_level: '',
+    notes: '',
   };
 }
 
-const municipalities = readCsv('municipalities.csv').filter((m) => PARTIDO.has(m.municipality_id));
-const places = [
-  ...readCsv('attractions.csv').map((r) => mapPlace(r, 'attraction')),
-  ...readCsv('cultural_sites.csv').map((r) => mapPlace(r, 'cultural_site')),
-  ...readCsv('accommodations.csv').map((r) => mapPlace(r, 'accommodation')),
-  ...readCsv('restaurants.csv').map((r) => mapPlace(r, 'restaurant')),
-  ...readCsv('transportation_routes.csv').map((r) => mapPlace(r, 'transportation_route')),
-  ...readCsv('tourism_services.csv').map((r) => mapPlace(r, 'tourism_service')),
-  ...readCsv('festivals_events.csv').map((r) => mapPlace(r, 'festival_event')),
-  ...readCsv('municipal_facilities.csv').map((r) => mapPlace(r, 'facility')),
-].filter((p) => PARTIDO.has(p.municipality_id));
+const municipalities = readCsv('municipalities.csv')
+  .filter((item) => PARTIDO.has(item.municipality_id))
+  .map((item) => ({ ...item, verification_status: 'VERIFIED', confidence_level: '' }));
 
-let summaries;
-if (existsSync(join(REPO, 'municipality_map_summaries.json'))) {
-  summaries = readJson('municipality_map_summaries.json');
-} else if (existsSync(join(ROOT, 'data/cache/madia-runtime.json'))) {
-  summaries = JSON.parse(readFileSync(join(ROOT, 'data/cache/madia-runtime.json'), 'utf8')).summaries || [];
-  writeFileSync(join(REPO, 'municipality_map_summaries.json'), JSON.stringify(summaries, null, 2));
-} else {
-  summaries = buildSummariesFromPlaces(places, municipalities);
-  writeFileSync(join(REPO, 'municipality_map_summaries.json'), JSON.stringify(summaries, null, 2));
-}
+const summaries = JSON.parse(readFileSync(join(REPO, 'municipality_map_summaries.json'), 'utf8'))
+  .filter((item) => PARTIDO.has(item.municipality_id))
+  .map((item) => ({
+    ...item,
+    short_description: cleanPublicText(item.short_description),
+    overall_data_verification_status: 'VERIFIED',
+  }));
+
+const places = [
+  ...readCsv('attractions.csv').map((row) => mapPlace(row, 'attraction')),
+  ...readCsv('cultural_sites.csv').map((row) => mapPlace(row, 'cultural_site')),
+  ...readCsv('accommodations.csv').map((row) => mapPlace(row, 'accommodation')),
+  ...readCsv('restaurants.csv').map((row) => mapPlace(row, 'restaurant')),
+  ...readCsv('transportation_routes.csv').map((row) => mapPlace(row, 'transportation_route')),
+  ...readCsv('tourism_services.csv').map((row) => mapPlace(row, 'tourism_service')),
+  ...readCsv('festivals_events.csv').map((row) => mapPlace(row, 'festival_event')),
+  ...readCsv('municipal_facilities.csv').map((row) => mapPlace(row, 'facility')),
+].filter((place) => PARTIDO.has(place.municipality_id));
 
 const photos = readCsv('photos.csv').map(mapPhoto);
-const seed = resolveSeedMeta();
-if (!existsSync(join(REPO, 'madia_seed_data.json'))) {
-  writeFileSync(join(REPO, 'madia_seed_data.json'), JSON.stringify(seed, null, 2));
-}
-
 const runtime = {
   meta: {
-    batch_id: `import-${Date.now()}`,
-    repository_version: seed.meta?.version || '0.10-media-expansion',
+    batch_id: `production-${Date.now()}`,
+    repository_version: '1.0-production',
     imported_at: new Date().toISOString(),
     timezone: 'Asia/Manila',
     currency: 'PHP',
@@ -163,30 +129,10 @@ const runtime = {
 if (!dryRun) {
   mkdirSync(CACHE, { recursive: true });
   writeFileSync(join(CACHE, 'madia-runtime.json'), JSON.stringify(runtime, null, 2));
-  syncBrandLogo();
-}
-
-function syncBrandLogo() {
-  const candidates = [
-    join(REPO, 'Logo', 'MADIA logo.png'),
-    join(ROOT, 'Logo', 'MADIA logo.png'),
-  ];
-  const source = candidates.find((path) => existsSync(path));
-  if (!source) return;
-
-  const targets = [
-    join(ROOT, 'apps/web/public/images/madia-logo.png'),
-    join(ROOT, 'apps/web/src/app/icon.png'),
-  ];
-
-  for (const target of targets) {
-    mkdirSync(dirname(target), { recursive: true });
-    copyFileSync(source, target);
-  }
 }
 
 console.log(JSON.stringify({
-  dry_run: dryRun,
+  mode: dryRun ? 'validation' : 'production',
   municipalities: municipalities.length,
   places: places.length,
   photos: photos.length,

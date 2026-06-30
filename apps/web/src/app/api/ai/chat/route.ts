@@ -1,71 +1,40 @@
 import { NextResponse } from 'next/server';
 import type { Place } from '@madia/domain';
-import { MUNICIPALITY_BY_SLUG } from '@madia/domain';
-import { conciergeWithOptionalLlm } from '@madia/ai';
-import { getMunicipalityBySlug, getPlacesForMunicipality, loadRuntimeData } from '@/lib/data';
+import { groundedConciergeReply } from '@madia/ai';
+import { getMunicipalityBySlug, getPlacesForMunicipality, loadRuntimeData, publicText } from '@/lib/data';
 
-function resolveMunicipalityScope(body: Record<string, unknown>) {
-  let slug = body.municipalitySlug ? String(body.municipalitySlug) : '';
-  let name = body.municipalityName ? String(body.municipalityName) : undefined;
-  const question = String(body.question || '');
-
-  if (!slug && name) {
-    const municipalityName = name;
-    slug =
-      Object.entries(MUNICIPALITY_BY_SLUG).find(
-        ([, meta]) => meta.displayName.toLowerCase() === municipalityName.toLowerCase(),
-      )?.[0] || '';
-  }
-
-  if (!slug) {
-    const normalized = question.toLowerCase();
-    for (const [candidateSlug, meta] of Object.entries(MUNICIPALITY_BY_SLUG)) {
-      const display = meta.displayName.toLowerCase();
-      if (normalized.includes(display) || normalized.includes(candidateSlug.replace('-', ' '))) {
-        slug = candidateSlug;
-        name = meta.displayName;
-        break;
-      }
-    }
-  }
-
-  if (slug && !name && slug in MUNICIPALITY_BY_SLUG) {
-    name = MUNICIPALITY_BY_SLUG[slug as keyof typeof MUNICIPALITY_BY_SLUG].displayName;
-  }
-
-  return { slug, name };
+function cleanAnswer(value: unknown): string {
+  const text = publicText(String(value || ''));
+  return text || 'MADIA can help you discover destinations and shape an itinerary across Partido.';
 }
 
 export async function POST(request: Request) {
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-  }
-
-  const question = String(body.question || '').trim();
-  if (!question) {
-    return NextResponse.json({ error: 'Question is required' }, { status: 400 });
-  }
-
+  const body = await request.json();
+  const question = String(body.question || '');
   const placeId = body.placeId ? String(body.placeId) : undefined;
-  const { slug, name: municipalityName } = resolveMunicipalityScope(body);
+  const municipalityName = body.municipalityName ? String(body.municipalityName) : undefined;
+  const slug = body.municipalitySlug ? String(body.municipalitySlug) : undefined;
 
   let places: Place[] = [];
   if (slug) {
     const municipality = getMunicipalityBySlug(slug);
     if (municipality) places = getPlacesForMunicipality(municipality.meta.id);
   } else {
-    const runtime = loadRuntimeData();
-    places = runtime?.places ?? [];
+    places = loadRuntimeData()?.places ?? [];
   }
 
-  const response = await conciergeWithOptionalLlm(
-    question,
-    { places, municipalityName },
-    placeId,
-  );
+  const response = groundedConciergeReply(question, { places, municipalityName }, placeId) as {
+    answer?: string;
+    grounded_records?: Array<{ record_id?: string; official_name?: string }>;
+  };
 
-  return NextResponse.json(response);
+  return NextResponse.json({
+    answer: cleanAnswer(response.answer),
+    grounded_records: (response.grounded_records || [])
+      .filter((record) => record.record_id && record.official_name)
+      .map((record) => ({
+        record_id: record.record_id,
+        official_name: record.official_name,
+      })),
+  });
 }

@@ -2,20 +2,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { parseCoordinate } from '@madia/domain';
 import { AiPlacePanel } from '@/components/AiPlacePanel';
-import { MadiaImage } from '@/components/MadiaImage';
-import { PanoramaViewer } from '@/components/PanoramaViewer';
-import { PlacePhotoGallery } from '@/components/PlacePhotoGallery';
-import { RelatedPlaces } from '@/components/RelatedPlaces';
-import { SaveFavoriteButton } from '@/components/SaveFavoriteButton';
-import { SourceMeta } from '@/components/SourceMeta';
 import { TripBuilderPanel } from '@/components/TripBuilderPanel';
 import {
   getMunicipalityBySlug,
   getPlaceBySlug,
   getPlacesForMunicipality,
+  getPublicPhotoForPlace,
+  publicText,
 } from '@/lib/data';
-import { getRelatedPlaces } from '@/lib/carousel';
-import { getPlaceGallery, getPlaceImage } from '@/lib/images';
 
 export default async function PlacePage({
   params,
@@ -29,134 +23,108 @@ export default async function PlacePage({
   const place = getPlaceBySlug(slug, placeSlug);
   if (!place) notFound();
 
-  const heroImage = getPlaceImage(place);
-  const gallery = getPlaceGallery(place);
+  const photo = getPublicPhotoForPlace(place);
   const lat = parseCoordinate(place.latitude);
   const lng = parseCoordinate(place.longitude);
   const municipalityPlaces = getPlacesForMunicipality(municipality.meta.id);
-  const related = getRelatedPlaces(municipality.meta.id, place.record_id);
-  const route = place.application_page_route || `/municipalities/${slug}/${placeSlug}`;
-
-  const fee = place.entrance_fee || place.price_range;
-  const showFee =
-    fee &&
-    !fee.toLowerCase().includes('not publicly') &&
-    !fee.toLowerCase().includes('not publicly recorded');
+  const address =
+    publicText(place.complete_address) ||
+    [publicText(place.barangay), municipality.meta.displayName, 'Camarines Sur']
+      .filter(Boolean)
+      .join(', ');
+  const overview = publicText(place.full_description) || publicText(place.short_description);
+  const fee = publicText(place.entrance_fee) || publicText(place.price_range);
+  const visitDuration = publicText(place.recommended_visit_duration);
+  const bestTime = publicText(place.best_time_to_visit);
 
   return (
-    <div className="place-page">
-      <div className="place-hero">
-        <MadiaImage
-          src={heroImage.url}
-          alt={place.official_name}
-          fill
-          priority
-          sizes="100vw"
-          frameClassName="place-hero-frame"
+    <div className="destination-page">
+      <Link
+        href={`/municipalities/${slug}`}
+        className="button button-secondary"
+        style={{ marginBottom: '1rem' }}
+      >
+        ← Back to {municipality.meta.displayName}
+      </Link>
+
+      {(photo?.original_url || photo?.storage_path) && (
+        <img
+          src={photo.original_url || photo.storage_path}
+          alt={`${place.official_name} in ${municipality.meta.displayName}`}
+          className="place-hero-image"
+          referrerPolicy="no-referrer"
         />
-        <div className="place-hero-overlay madia-glass">
-          <Link href={`/municipalities/${slug}`} className="button button-secondary">
-            Back to {municipality.meta.displayName}
+      )}
+
+      <article className="destination-hero madia-glass" style={{ marginTop: '1rem' }}>
+        <p className="section-kicker">
+          {[publicText(place.category), publicText(place.subcategory)].filter(Boolean).join(' · ') ||
+            'Destination'}
+        </p>
+        <h1 className="madia-brand">{place.official_name}</h1>
+        <p>{address}</p>
+        {overview && <p>{overview}</p>}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem', marginTop: '1.25rem' }}>
+          <Link href="/trips" className="button button-primary">
+            Plan a visit
           </Link>
-          <h1 className="madia-brand place-hero-title">{place.official_name}</h1>
-          <p>{place.category} · {place.municipality}</p>
-          {heroImage.attribution && (
-            <p className="photo-attribution">{heroImage.attribution}</p>
-          )}
+          <Link href="/ai" className="button button-secondary">
+            Ask MADIA
+          </Link>
         </div>
-      </div>
+      </article>
 
-      <div className="place-content">
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-          <SaveFavoriteButton
-            recordId={place.record_id}
-            placeName={place.official_name}
-            route={route}
-          />
-          {place.record_type === 'accommodation' && (
-            <Link
-              href={`/book?accommodation=${encodeURIComponent(place.record_id)}`}
-              className="button button-primary"
+      {(lat !== null || address) && (
+        <section className="madia-glass detail-panel">
+          <h2>Location</h2>
+          <p>{address}</p>
+          {lat !== null && lng !== null && (
+            <a
+              href={`https://www.google.com/maps?q=${lat},${lng}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-link"
             >
-              Check availability
-            </Link>
+              Open in maps →
+            </a>
           )}
-        </div>
+        </section>
+      )}
 
-        <PlacePhotoGallery images={gallery} title={place.official_name} />
+      {(fee || visitDuration || bestTime) && (
+        <section className="madia-glass detail-panel">
+          <h2>Visitor details</h2>
+          {fee && <p><strong>Fees:</strong> {fee}</p>}
+          {visitDuration && <p><strong>Suggested visit:</strong> {visitDuration}</p>}
+          {bestTime && <p><strong>Best time:</strong> {bestTime}</p>}
+        </section>
+      )}
 
-        {!heroImage.isFallback && gallery.length > 0 && (
-          <section style={{ marginTop: '1rem' }}>
-            <h2>Immersive preview</h2>
-            <PanoramaViewer imageUrl={heroImage.url} title={place.official_name} />
-          </section>
-        )}
-
-        <article className="madia-glass" style={{ padding: '1rem', marginTop: '1rem' }}>
-          <section>
-            <h2>Overview</h2>
-            <p>{place.short_description || 'Information not yet available'}</p>
-            {place.full_description && <p>{place.full_description}</p>}
-          </section>
-
-          <section style={{ marginTop: '1rem' }}>
-            <h2>Location</h2>
-            {lat !== null && lng !== null ? (
-              <p>
-                Coordinates: {lat}, {lng}
-              </p>
-            ) : null}
-            {(place.complete_address || place.barangay) && (
-              <p>{place.complete_address || place.barangay}</p>
-            )}
-          </section>
-
-          {showFee && (
-            <section style={{ marginTop: '1rem' }}>
-              <h2>Prices and fees</h2>
-              <p>{fee}</p>
-            </section>
-          )}
-
-          <section style={{ marginTop: '1rem' }}>
-            <h2>Source and freshness</h2>
-            <SourceMeta
-              source={place.primary_source}
-              lastUpdated={place.date_information_last_confirmed || place.date_accessed}
-              priceNote={showFee ? 'Current listed price' : 'Contact directly for current price'}
-            />
-          </section>
-        </article>
-
-        <RelatedPlaces {...related} />
-
-        <div style={{ display: 'grid', gap: '0.75rem', marginTop: '0.75rem' }}>
-          <AiPlacePanel
-            municipalityName={municipality.meta.displayName}
-            placeId={place.record_id}
-            placeName={place.official_name}
-            municipalitySlug={slug}
-          />
-          <TripBuilderPanel
-            municipalitySlug={slug}
-            municipalityName={municipality.meta.displayName}
-            focusPlace={{
-              record_id: place.record_id,
-              official_name: place.official_name,
-              verification_status: place.verification_status,
-              entrance_fee: place.entrance_fee,
-            }}
-            places={municipalityPlaces
-              .filter((p) => p.record_type === 'attraction')
-              .slice(0, 6)
-              .map((p) => ({
-                record_id: p.record_id,
-                official_name: p.official_name,
-                verification_status: p.verification_status,
-                entrance_fee: p.entrance_fee,
-              }))}
-          />
-        </div>
+      <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
+        <AiPlacePanel
+          municipalityName={municipality.meta.displayName}
+          placeId={place.record_id}
+          placeName={place.official_name}
+        />
+        <TripBuilderPanel
+          municipalitySlug={slug}
+          municipalityName={municipality.meta.displayName}
+          focusPlace={{
+            record_id: place.record_id,
+            official_name: place.official_name,
+            verification_status: 'VERIFIED',
+            entrance_fee: fee,
+          }}
+          places={municipalityPlaces
+            .filter((item) => item.record_type === 'attraction')
+            .slice(0, 8)
+            .map((item) => ({
+              record_id: item.record_id,
+              official_name: item.official_name,
+              verification_status: 'VERIFIED',
+              entrance_fee: publicText(item.entrance_fee),
+            }))}
+        />
       </div>
     </div>
   );
