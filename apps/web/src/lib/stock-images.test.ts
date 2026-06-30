@@ -2,22 +2,28 @@ import { describe, expect, it } from 'vitest';
 import { getStockImageForPlace } from './stock-images';
 
 describe('getStockImageForPlace', () => {
-  it('returns accommodation beach imagery', () => {
+  it('returns verified place photo for Gota Beach by name', () => {
     const image = getStockImageForPlace({
-      record_id: 'MADIA-CAR-ACC-001',
-      record_type: 'accommodation',
+      record_id: 'MADIA-CAR-ATT-005',
+      record_type: 'attraction',
+      municipality_id: 'MADIA-MUN-CAR',
+      official_name: 'Gota Beach',
+      category: 'Natural Attraction',
     } as never);
-    expect(image?.url).toContain('wikimedia.org');
-    expect(image?.attribution).toBeTruthy();
+    expect(image?.url).toMatch(/Gota_Beach|Gota-Beach/i);
   });
 
-  it('returns restaurant food imagery', () => {
+  it('returns municipality scenery for restaurants instead of unrelated food stock', () => {
     const image = getStockImageForPlace({
-      record_id: 'MADIA-CAR-RES-001',
+      record_id: 'MADIA-GOA-RES-001',
       record_type: 'restaurant',
+      municipality_id: 'MADIA-MUN-GOA',
+      official_name: 'Local Grill House',
+      category: 'Restaurant',
     } as never);
     expect(image?.url).toContain('wikimedia.org');
-    expect(image?.url).toMatch(/pusit|Kinilaw|Market|Adobong/i);
+    expect(image?.url).toMatch(/Goa|goa/i);
+    expect(image?.url).not.toMatch(/Kinilaw|Mindanao|pusit/i);
   });
 
   it('returns attraction island imagery for island names', () => {
@@ -63,13 +69,15 @@ describe('getStockImageForPlace', () => {
     } as never);
     expect(image?.url).toMatch(/Goa_Church/i);
   });
-  it('varies images by record id', () => {
+  it('varies images by record id within the same municipality', () => {
     const urls = new Set(
-      ['MADIA-CAR-RES-001', 'MADIA-CAR-RES-002', 'MADIA-CAR-RES-003', 'MADIA-CAR-RES-004'].map(
+      ['MADIA-CAR-ATT-002', 'MADIA-CAR-ATT-003', 'MADIA-CAR-ATT-004', 'MADIA-CAR-ATT-005'].map(
         (record_id) =>
           getStockImageForPlace({
             record_id,
-            record_type: 'restaurant',
+            record_type: 'attraction',
+            municipality_id: 'MADIA-MUN-CAR',
+            official_name: record_id,
           } as never)?.url,
       ),
     );

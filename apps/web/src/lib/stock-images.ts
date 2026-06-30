@@ -1,4 +1,5 @@
 import type { Place } from '@madia/domain';
+import { matchPlaceNameStock } from './place-name-stock';
 
 export interface StockImage {
   url: string;
@@ -280,18 +281,42 @@ function matchFestivalStock(place: Place): StockImage | null {
     }
   }
 
-  return pickFromPool(placeImageKey(place), STOCK_BY_RECORD_TYPE.festival_event);
+  return null;
 }
 
-function matchKeywordStock(place: Place): StockImage | null {
-  if (place.record_type === 'festival_event') return null;
+function matchCulturalSiteStock(place: Place): StockImage | null {
+  if (place.record_type !== 'cultural_site') return null;
+  const text = placeSearchText(place);
+  if (/church|parish|chapel|shrine/i.test(text) && place.municipality_id) {
+    const parish = PARISH_CHURCH_BY_MUNICIPALITY[place.municipality_id];
+    if (parish) return parish;
+  }
+  return matchPlaceNameStock(place);
+}
+
+function matchMunicipalityKeywordStock(place: Place): StockImage | null {
+  if (!place.municipality_id) return null;
+  const pool = STOCK_BY_MUNICIPALITY[place.municipality_id];
+  if (!pool?.length) return null;
 
   const text = placeSearchText(place);
   for (const entry of STOCK_BY_KEYWORD) {
     if (!entry.pattern.test(text)) continue;
-    return pickFromPool(placeImageKey(place), entry.images);
+    const scoped = pool.filter((image) =>
+      entry.images.some((candidate) => candidate.url === image.url),
+    );
+    if (scoped.length > 0) {
+      return pickFromPool(placeImageKey(place), scoped);
+    }
   }
   return null;
+}
+
+function matchMunicipalityScenicStock(place: Place): StockImage | null {
+  if (!place.municipality_id) return null;
+  const scenic = scenicMunicipalityPool(place.municipality_id);
+  if (scenic.length === 0) return null;
+  return pickFromPool(placeImageKey(place), scenic);
 }
 
 function matchMunicipalityStock(place: Place): StockImage | null {
@@ -302,6 +327,22 @@ function matchMunicipalityStock(place: Place): StockImage | null {
 }
 
 function matchRecordTypeStock(place: Place): StockImage | null {
+  const municipalOnly = new Set([
+    'restaurant',
+    'accommodation',
+    'tourism_service',
+    'facility',
+    'transportation_route',
+  ]);
+  if (place.municipality_id && municipalOnly.has(place.record_type)) {
+    return matchMunicipalityScenicStock(place);
+  }
+
+  if (place.municipality_id) {
+    const scenic = matchMunicipalityScenicStock(place);
+    if (scenic) return scenic;
+  }
+
   const pool = STOCK_BY_RECORD_TYPE[place.record_type];
   if (!pool?.length) return null;
   return pickFromPool(placeImageKey(place), pool);
@@ -312,8 +353,13 @@ export function getStockImageForPlace(place: Place): StockImage | null {
     return matchFestivalStock(place);
   }
 
+  if (place.record_type === 'cultural_site') {
+    return matchCulturalSiteStock(place) || matchMunicipalityKeywordStock(place) || matchMunicipalityStock(place);
+  }
+
   return (
-    matchKeywordStock(place) ||
+    matchPlaceNameStock(place) ||
+    matchMunicipalityKeywordStock(place) ||
     matchMunicipalityStock(place) ||
     matchRecordTypeStock(place)
   );

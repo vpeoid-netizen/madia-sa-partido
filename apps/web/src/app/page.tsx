@@ -5,8 +5,9 @@ import { HomeSections } from '@/components/HomeSections';
 import { MadiaImage } from '@/components/MadiaImage';
 import { PartidoMap } from '@/components/PartidoMap';
 import { loadGeoJson, loadRuntimeData, publicText } from '@/lib/data';
-import { getMunicipalityImage } from '@/lib/images';
+import { getMunicipalityImage, getPlaceImage } from '@/lib/images';
 import { buildHomeSectionsData } from '@/lib/home-sections';
+import { PROVINCIAL_FALLBACK } from '@/lib/image-utils';
 
 const MUNICIPALITY_SLUG_BY_ID = Object.fromEntries(
   Object.entries(MUNICIPALITY_BY_SLUG).map(([slug, info]) => [info.id, slug]),
@@ -24,28 +25,11 @@ export default function HomePage() {
     places: runtime.places,
   });
 
-  const usablePhotos = runtime.photos.filter(
-    (photo) => photo.public_use_eligibility === 'yes' && (photo.original_url || photo.storage_path),
-  );
-  const photoByRecord = new Map(
-    usablePhotos.filter((photo) => photo.related_record_id).map((photo) => [photo.related_record_id, photo]),
-  );
-  const photoByMunicipality = new Map<string, (typeof usablePhotos)[number]>();
-  usablePhotos.forEach((photo) => {
-    if (!photo.municipality_id) return;
-    if (!photoByMunicipality.has(photo.municipality_id)) {
-      photoByMunicipality.set(photo.municipality_id, photo);
-    }
-  });
-
   const slides: AttractionSlide[] = runtime.places
     .filter((place) => place.record_type === 'attraction')
     .filter((place) => place.official_name && place.application_page_route)
     .map((place) => {
-      const photo =
-        photoByRecord.get(place.record_id) ||
-        usablePhotos.find((item) => item.photo_id === place.cover_photo_id) ||
-        photoByMunicipality.get(place.municipality_id);
+      const image = getPlaceImage(place);
       const barangay = publicText(place.barangay);
       const address =
         publicText(place.complete_address) ||
@@ -66,8 +50,8 @@ export default function HomePage() {
           description ||
           `Discover ${place.official_name}, one of the distinctive destinations of ${municipalityName}.`,
         route: place.application_page_route || `/municipalities/${municipalitySlug}`,
-        imageUrl: photo?.original_url || photo?.storage_path,
-        imageAttribution: photo?.required_attribution,
+        imageUrl: image.url.endsWith(PROVINCIAL_FALLBACK) ? undefined : image.url,
+        imageAttribution: image.attribution,
       };
     })
     .sort((a, b) => a.municipality.localeCompare(b.municipality) || a.name.localeCompare(b.name));
