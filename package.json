@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "apps/web",
     "packages/*"
   ],
   "scripts": {
@@ -13,6 +13,7 @@
     "fix:permissions": "node scripts/fix-permissions.mjs",
     "start:ollama": "node scripts/start-ollama.mjs",
     "deploy:github": "node scripts/github-push.mjs",
+    "install:mobile": "npm install --prefix apps/mobile",
     "dev": "npm run dev --workspace=@madia/web",
     "dev:direct": "npm run dev --workspace=@madia/web",
     "dev:web": "npm run dev --workspace=@madia/web",

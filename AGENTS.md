@@ -9,7 +9,7 @@ MADIA sa Partido is a production tourism platform for the ten municipalities of 
 ## Repository layout
 
 - `apps/web` — Next.js 15 App Router (primary release)
-- `apps/mobile` — Expo shell (parity work in Phase 9)
+- `apps/mobile` — Expo shell (install with `npm run install:mobile` from repo root)
 - `packages/domain` — entities, validation, search, budget
 - `packages/ui` — design tokens
 - `packages/maps` — MapLibre helpers, GeoJSON types

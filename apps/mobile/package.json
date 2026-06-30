@@ -9,7 +9,7 @@
     "ios": "expo start --ios"
   },
   "dependencies": {
-    "@madia/domain": "*",
+    "@madia/domain": "file:../../packages/domain",
     "expo": "~53.0.0",
     "expo-router": "~5.0.0",
     "react": "19.0.0",
