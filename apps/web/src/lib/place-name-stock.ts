@@ -16,6 +16,38 @@ const RULES: Array<{
     },
   },
   {
+    pattern: /tugawe/i,
+    municipalityId: 'MADIA-MUN-CAR',
+    image: {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/7/7f/Manlawi_Sandbar%2C_Caramoan_Island%2C_Camarines_Sur.jpg',
+      attribution: 'Photo by JannahTepace, CC BY-SA 4.0, via Wikimedia Commons',
+    },
+  },
+  {
+    pattern: /paniman/i,
+    municipalityId: 'MADIA-MUN-CAR',
+    image: {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Lahos_Island.jpg',
+      attribution: 'Photo by Itsmateoduh, CC BY-SA 4.0, via Wikimedia Commons',
+    },
+  },
+  {
+    pattern: /residencia|salvacion/i,
+    municipalityId: 'MADIA-MUN-CAR',
+    image: {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Sabitang_Laya_Island.jpg',
+      attribution: 'Photo by Judith.arendaing, CC BY-SA 4.0, via Wikimedia Commons',
+    },
+  },
+  {
+    pattern: /airusxander|rmtm|front beach/i,
+    municipalityId: 'MADIA-MUN-CAR',
+    image: {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/2/21/Caramoan_Peninsula%2C_Camarines_Sur.jpg',
+      attribution: 'Photo by JannahTepace, CC BY-SA 4.0, via Wikimedia Commons',
+    },
+  },
+  {
     pattern: /manlawi/i,
     municipalityId: 'MADIA-MUN-CAR',
     image: {

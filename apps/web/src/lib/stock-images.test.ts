@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getStockImageForPlace } from './stock-images';
+import { getStockImageForPlace, getStockImageCandidatesForPlace } from './stock-images';
 
 describe('getStockImageForPlace', () => {
   it('returns verified place photo for Gota Beach by name', () => {
@@ -82,5 +82,16 @@ describe('getStockImageForPlace', () => {
       ),
     );
     expect(urls.size).toBeGreaterThan(1);
+  });
+
+  it('returns multiple candidates for accommodations', () => {
+    const candidates = getStockImageCandidatesForPlace({
+      record_id: 'MADIA-CAR-ACC-001',
+      record_type: 'accommodation',
+      municipality_id: 'MADIA-MUN-CAR',
+      official_name: 'Tugawe Cove Resort',
+      category: 'Accommodation',
+    } as never);
+    expect(candidates.length).toBeGreaterThan(3);
   });
 });

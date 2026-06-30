@@ -6,7 +6,7 @@ import {
   PROVINCIAL_FALLBACK,
   type PlaceImageInfo,
 } from './image-utils';
-import { getStockImageForPlace } from './stock-images';
+import { getStockImageCandidatesForPlace } from './stock-images';
 
 export { normalizePhotoUrl, PROVINCIAL_FALLBACK, type PlaceImageInfo } from './image-utils';
 
@@ -19,7 +19,7 @@ function hashRecordId(recordId?: string | null): number {
   return Math.abs(hash);
 }
 
-function placeImageKey(place: Place): string {
+export function placeImageLookupKey(place: Place): string {
   return (
     place.record_id ||
     place.application_page_route ||
@@ -70,40 +70,75 @@ export function getPhotosForPlace(recordId: string): Photo[] {
   );
 }
 
-export function getPlaceImage(place: Place): PlaceImageInfo {
-  const data = loadRuntimeData();
+export function getPlaceImageCandidates(place: Place): PlaceImageInfo[] {
+  const candidates: PlaceImageInfo[] = [];
+  const seen = new Set<string>();
+
+  const add = (info: PlaceImageInfo | null | undefined) => {
+    if (!info?.url || seen.has(info.url)) return;
+    seen.add(info.url);
+    candidates.push(info);
+  };
 
   if (place.cover_photo_id) {
-    const cover = resolvePhotoImage(getPublicPhoto(place.cover_photo_id));
-    if (cover) return cover;
+    add(resolvePhotoImage(getPublicPhoto(place.cover_photo_id)));
   }
 
-  const related = getPhotosForPlace(place.record_id);
-  for (const photo of related) {
-    const resolved = resolvePhotoImage(photo);
-    if (resolved) return resolved;
+  for (const photo of getPhotosForPlace(place.record_id)) {
+    add(resolvePhotoImage(photo));
   }
 
-  const stock = getStockImageForPlace(place);
-  if (stock) {
-    return {
+  for (const stock of getStockImageCandidatesForPlace(place)) {
+    add({
       url: stock.url,
       attribution: stock.attribution,
       isFallback: true,
-    };
+    });
   }
 
   if (place.municipality_id) {
-    const municipal = pickFromPool(
-      placeImageKey(place),
-      municipalPublicPhotos(place.municipality_id),
-    );
-    if (municipal) {
-      return { ...municipal, isFallback: true };
+    for (const image of municipalPublicPhotos(place.municipality_id)) {
+      add(image);
     }
   }
 
-  return { url: PROVINCIAL_FALLBACK, isFallback: true };
+  add({ url: PROVINCIAL_FALLBACK, isFallback: true });
+  return candidates;
+}
+
+export function pickUniquePlaceImage(
+  place: Place,
+  usedUrls: Set<string>,
+): PlaceImageInfo {
+  for (const candidate of getPlaceImageCandidates(place)) {
+    if (!usedUrls.has(candidate.url)) {
+      usedUrls.add(candidate.url);
+      return candidate;
+    }
+  }
+
+  const fallback = getPlaceImageCandidates(place)[0] ?? {
+    url: PROVINCIAL_FALLBACK,
+    isFallback: true,
+  };
+  usedUrls.add(fallback.url);
+  return fallback;
+}
+
+export function assignUniquePlaceImages(places: Place[]): Map<string, PlaceImageInfo> {
+  const used = new Set<string>();
+  const result = new Map<string, PlaceImageInfo>();
+
+  for (const place of places) {
+    const key = placeImageLookupKey(place);
+    result.set(key, pickUniquePlaceImage(place, used));
+  }
+
+  return result;
+}
+
+export function getPlaceImage(place: Place): PlaceImageInfo {
+  return pickUniquePlaceImage(place, new Set());
 }
 
 export function getMunicipalityImage(

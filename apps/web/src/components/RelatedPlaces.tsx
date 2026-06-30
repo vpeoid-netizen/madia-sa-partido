@@ -1,16 +1,26 @@
 import Link from 'next/link';
 import type { Place } from '@madia/domain';
 import { MadiaImage } from '@/components/MadiaImage';
-import { getPlaceImage } from '@/lib/images';
+import { assignUniquePlaceImages, placeImageLookupKey } from '@/lib/images';
 
-function RelatedList({ title, places, bookable }: { title: string; places: Place[]; bookable?: boolean }) {
+function RelatedList({
+  title,
+  places,
+  imageMap,
+  bookable,
+}: {
+  title: string;
+  places: Place[];
+  imageMap: Map<string, import('@/lib/image-utils').PlaceImageInfo>;
+  bookable?: boolean;
+}) {
   if (places.length === 0) return null;
   return (
     <section className="related-section">
       <h2>{title}</h2>
       <ul className="home-grid">
         {places.map((p) => {
-          const image = getPlaceImage(p);
+          const image = imageMap.get(placeImageLookupKey(p))!;
           return (
             <li key={p.record_id} className="home-card madia-glass">
               <MadiaImage
@@ -23,7 +33,7 @@ function RelatedList({ title, places, bookable }: { title: string; places: Place
               <div className="home-card-body">
                 <h3>{p.official_name}</h3>
                 <p className="home-card-meta">{p.category}</p>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <div className="home-card-actions">
                   {p.application_page_route && (
                     <Link href={p.application_page_route} className="button button-secondary">
                       Details
@@ -56,11 +66,13 @@ export function RelatedPlaces({
   restaurants: Place[];
   transport: Place[];
 }) {
+  const imageMap = assignUniquePlaceImages([...accommodations, ...restaurants, ...transport]);
+
   return (
     <div className="related-places">
-      <RelatedList title="Nearby stays" places={accommodations} bookable />
-      <RelatedList title="Food nearby" places={restaurants} />
-      <RelatedList title="Getting there" places={transport} />
+      <RelatedList title="Nearby stays" places={accommodations} imageMap={imageMap} bookable />
+      <RelatedList title="Food nearby" places={restaurants} imageMap={imageMap} />
+      <RelatedList title="Getting there" places={transport} imageMap={imageMap} />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import {
   placeSlugFromRoute,
   publicText,
 } from '@/lib/data';
-import { getPlaceImage } from '@/lib/images';
+import { assignUniquePlaceImages, placeImageLookupKey } from '@/lib/images';
 
 export default async function MunicipalityPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -20,6 +20,7 @@ export default async function MunicipalityPage({ params }: { params: Promise<{ s
   );
   const accommodations = places.filter((place) => place.record_type === 'accommodation');
   const restaurants = places.filter((place) => place.record_type === 'restaurant');
+  const placeImages = assignUniquePlaceImages(attractions);
 
   return (
     <div className="destination-page">
@@ -46,7 +47,7 @@ export default async function MunicipalityPage({ params }: { params: Promise<{ s
         </div>
         <div className="place-grid">
           {attractions.map((place) => {
-            const image = getPlaceImage(place);
+            const image = placeImages.get(placeImageLookupKey(place))!;
             const route = `/municipalities/${slug}/${placeSlugFromRoute(place.application_page_route)}`;
             return (
               <Link key={place.record_id} href={route} className="place-card madia-glass">

@@ -1,5 +1,5 @@
 import type { MunicipalityMapSummary, Place } from '@madia/domain';
-import { getMunicipalityImage, getPlaceImage } from '@/lib/images';
+import { assignUniquePlaceImages, getMunicipalityImage, placeImageLookupKey } from '@/lib/images';
 import { publicText } from '@/lib/data';
 
 export const HOME_CATEGORIES = [
@@ -31,14 +31,28 @@ export function buildHomeSectionsData(input: {
     image: getMunicipalityImage(summary.municipality_id, summary.cover_photo_id),
   }));
 
-  const toCard = (place: Place) => ({ place, image: getPlaceImage(place) });
+  const accommodations = pickPlaces(input.places, 'accommodation');
+  const restaurants = pickPlaces(input.places, 'restaurant');
+  const events = pickPlaces(input.places, 'festival_event');
+  const transport = pickPlaces(input.places, 'transportation_route', 4);
+  const imageMap = assignUniquePlaceImages([
+    ...accommodations,
+    ...restaurants,
+    ...events,
+    ...transport,
+  ]);
+
+  const toCard = (place: Place) => ({
+    place,
+    image: imageMap.get(placeImageLookupKey(place))!,
+  });
 
   return {
     municipalities,
-    accommodations: pickPlaces(input.places, 'accommodation').map(toCard),
-    restaurants: pickPlaces(input.places, 'restaurant').map(toCard),
-    events: pickPlaces(input.places, 'festival_event').map(toCard),
-    transport: pickPlaces(input.places, 'transportation_route', 4).map(toCard),
+    accommodations: accommodations.map(toCard),
+    restaurants: restaurants.map(toCard),
+    events: events.map(toCard),
+    transport: transport.map(toCard),
     categories: [...HOME_CATEGORIES],
   };
 }

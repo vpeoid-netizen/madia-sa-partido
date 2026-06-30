@@ -312,55 +312,61 @@ function matchMunicipalityKeywordStock(place: Place): StockImage | null {
   return null;
 }
 
-function matchMunicipalityScenicStock(place: Place): StockImage | null {
-  if (!place.municipality_id) return null;
-  const scenic = scenicMunicipalityPool(place.municipality_id);
-  if (scenic.length === 0) return null;
-  return pickFromPool(placeImageKey(place), scenic);
-}
-
-function matchMunicipalityStock(place: Place): StockImage | null {
-  if (!place.municipality_id) return null;
-  const pool = STOCK_BY_MUNICIPALITY[place.municipality_id];
-  if (!pool?.length) return null;
-  return pickFromPool(placeImageKey(place), pool);
-}
-
-function matchRecordTypeStock(place: Place): StockImage | null {
-  const municipalOnly = new Set([
-    'restaurant',
-    'accommodation',
-    'tourism_service',
-    'facility',
-    'transportation_route',
-  ]);
-  if (place.municipality_id && municipalOnly.has(place.record_type)) {
-    return matchMunicipalityScenicStock(place);
-  }
-
-  if (place.municipality_id) {
-    const scenic = matchMunicipalityScenicStock(place);
-    if (scenic) return scenic;
-  }
-
-  const pool = STOCK_BY_RECORD_TYPE[place.record_type];
-  if (!pool?.length) return null;
-  return pickFromPool(placeImageKey(place), pool);
-}
-
 export function getStockImageForPlace(place: Place): StockImage | null {
+  return getStockImageCandidatesForPlace(place)[0] ?? null;
+}
+
+function addStockCandidate(candidates: StockImage[], seen: Set<string>, image: StockImage | null) {
+  if (!image || seen.has(image.url)) return;
+  seen.add(image.url);
+  candidates.push(image);
+}
+
+/** Ordered stock photo candidates for a place (broadest pool last). */
+export function getStockImageCandidatesForPlace(place: Place): StockImage[] {
+  const candidates: StockImage[] = [];
+  const seen = new Set<string>();
+
   if (place.record_type === 'festival_event') {
-    return matchFestivalStock(place);
+    addStockCandidate(candidates, seen, matchFestivalStock(place));
   }
 
   if (place.record_type === 'cultural_site') {
-    return matchCulturalSiteStock(place) || matchMunicipalityKeywordStock(place) || matchMunicipalityStock(place);
+    addStockCandidate(candidates, seen, matchCulturalSiteStock(place));
   }
 
-  return (
-    matchPlaceNameStock(place) ||
-    matchMunicipalityKeywordStock(place) ||
-    matchMunicipalityStock(place) ||
-    matchRecordTypeStock(place)
-  );
+  addStockCandidate(candidates, seen, matchPlaceNameStock(place));
+  addStockCandidate(candidates, seen, matchMunicipalityKeywordStock(place));
+
+  if (place.municipality_id) {
+    for (const image of scenicMunicipalityPool(place.municipality_id)) {
+      addStockCandidate(candidates, seen, image);
+    }
+    for (const image of STOCK_BY_MUNICIPALITY[place.municipality_id] || []) {
+      addStockCandidate(candidates, seen, image);
+    }
+  }
+
+  const recordPool = STOCK_BY_RECORD_TYPE[place.record_type];
+  if (recordPool) {
+    for (const image of recordPool) {
+      addStockCandidate(candidates, seen, image);
+    }
+  }
+
+  const text = placeSearchText(place);
+  for (const entry of STOCK_BY_KEYWORD) {
+    if (!entry.pattern.test(text)) continue;
+    for (const image of entry.images) {
+      addStockCandidate(candidates, seen, image);
+    }
+  }
+
+  for (const pool of Object.values(STOCK_BY_MUNICIPALITY)) {
+    for (const image of pool) {
+      addStockCandidate(candidates, seen, image);
+    }
+  }
+
+  return candidates;
 }

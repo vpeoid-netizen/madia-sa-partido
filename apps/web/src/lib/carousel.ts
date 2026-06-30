@@ -2,7 +2,7 @@ import type { Place } from '@madia/domain';
 import { MUNICIPALITY_BY_SLUG, type MunicipalitySlug } from '@madia/domain';
 import { getPublicPhoto, loadRuntimeData, placeSlugFromRoute } from './data';
 import { getCarouselOverrides } from './persistence';
-import { getMunicipalityImage, getPlaceImage } from './images';
+import { getMunicipalityImage, assignUniquePlaceImages, getPlaceImage, placeImageLookupKey } from './images';
 
 export interface CarouselSlide {
   featured_slide_id: string;
@@ -149,15 +149,26 @@ export function getHomepageSections() {
     { label: 'Adventures', query: 'island' },
   ];
 
+  const imageMap = assignUniquePlaceImages([
+    ...accommodations,
+    ...restaurants,
+    ...events,
+    ...transport,
+  ]);
+  const card = (place: Place) => ({
+    place,
+    image: imageMap.get(placeImageLookupKey(place))!,
+  });
+
   return {
     municipalities: data.summaries.map((m) => ({
       ...m,
       image: getMunicipalityImage(m.municipality_id, m.cover_photo_id),
     })),
-    accommodations: accommodations.map((p) => ({ place: p, image: getPlaceImage(p) })),
-    restaurants: restaurants.map((p) => ({ place: p, image: getPlaceImage(p) })),
-    events: events.map((p) => ({ place: p, image: getPlaceImage(p) })),
-    transport: transport.map((p) => ({ place: p, image: getPlaceImage(p) })),
+    accommodations: accommodations.map(card),
+    restaurants: restaurants.map(card),
+    events: events.map(card),
+    transport: transport.map(card),
     categories,
   };
 }

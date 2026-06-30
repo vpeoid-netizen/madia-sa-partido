@@ -5,7 +5,7 @@ import { HomeSections } from '@/components/HomeSections';
 import { MadiaImage } from '@/components/MadiaImage';
 import { PartidoMap } from '@/components/PartidoMap';
 import { loadGeoJson, loadRuntimeData, publicText } from '@/lib/data';
-import { getMunicipalityImage, getPlaceImage } from '@/lib/images';
+import { getMunicipalityImage, assignUniquePlaceImages, placeImageLookupKey } from '@/lib/images';
 import { buildHomeSectionsData } from '@/lib/home-sections';
 import { PROVINCIAL_FALLBACK } from '@/lib/image-utils';
 import { parseCoordinate } from '@madia/domain';
@@ -26,11 +26,19 @@ export default function HomePage() {
     places: runtime.places,
   });
 
-  const slides: AttractionSlide[] = runtime.places
+  const attractionPlaces = runtime.places
     .filter((place) => place.record_type === 'attraction')
     .filter((place) => place.official_name && place.application_page_route)
-    .map((place) => {
-      const image = getPlaceImage(place);
+    .sort(
+      (a, b) =>
+        (a.municipality || '').localeCompare(b.municipality || '') ||
+        (a.official_name || '').localeCompare(b.official_name || ''),
+    );
+
+  const attractionImages = assignUniquePlaceImages(attractionPlaces);
+
+  const slides: AttractionSlide[] = attractionPlaces.map((place) => {
+      const image = attractionImages.get(placeImageLookupKey(place))!;
       const barangay = publicText(place.barangay);
       const address =
         publicText(place.complete_address) ||
@@ -56,8 +64,7 @@ export default function HomePage() {
         imageUrl: image.url.endsWith(PROVINCIAL_FALLBACK) ? undefined : image.url,
         imageAttribution: image.attribution,
       };
-    })
-    .sort((a, b) => a.municipality.localeCompare(b.municipality) || a.name.localeCompare(b.name));
+    });
 
   return (
     <div className="home-page">
