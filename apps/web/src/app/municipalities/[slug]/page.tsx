@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { MadiaImage } from '@/components/MadiaImage';
 import {
   getMunicipalityBySlug,
   getPlacesForMunicipality,
-  getPublicPhotoForPlace,
   placeSlugFromRoute,
   publicText,
 } from '@/lib/data';
+import { getPlaceImage } from '@/lib/images';
 
 export default async function MunicipalityPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -45,20 +46,17 @@ export default async function MunicipalityPage({ params }: { params: Promise<{ s
         </div>
         <div className="place-grid">
           {attractions.map((place) => {
-            const photo = getPublicPhotoForPlace(place);
+            const image = getPlaceImage(place);
             const route = `/municipalities/${slug}/${placeSlugFromRoute(place.application_page_route)}`;
             return (
               <Link key={place.record_id} href={route} className="place-card madia-glass">
-                {photo?.original_url || photo?.storage_path ? (
-                  <img
-                    src={photo.original_url || photo.storage_path}
-                    alt={`${place.official_name} in ${info.meta.displayName}`}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="place-card__scenic" aria-hidden="true" />
-                )}
+                <MadiaImage
+                  src={image.url}
+                  alt={`${place.official_name} in ${info.meta.displayName}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  frameClassName="madia-image-frame place-card__image"
+                />
                 <div className="place-card__body">
                   <span className="place-card__type">
                     {publicText(place.subcategory) || publicText(place.category) || 'Destination'}

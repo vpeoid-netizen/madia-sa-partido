@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { AddToItineraryButton } from '@/components/AddToItineraryButton';
 
 export interface AttractionSlide {
   id: string;
   name: string;
   municipality: string;
+  municipalitySlug: string;
   address: string;
   type: string;
   description: string;
@@ -106,9 +108,12 @@ export function AttractionCarousel({ slides }: { slides: AttractionSlide[] }) {
           <Link href={current.route} className="button button-primary button-light">
             Explore destination
           </Link>
-          <Link href="/trips" className="button button-glass">
-            Add to an itinerary
-          </Link>
+          <AddToItineraryButton
+            placeId={current.id}
+            placeName={current.name}
+            municipalitySlug={current.municipalitySlug}
+            municipalityName={current.municipality}
+          />
         </div>
         {current.imageAttribution && (
           <p className="attraction-carousel__credit">{current.imageAttribution}</p>

@@ -2,14 +2,30 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { parseCoordinate } from '@madia/domain';
 import { AiPlacePanel } from '@/components/AiPlacePanel';
+import { PlacePhotoGallery } from '@/components/PlacePhotoGallery';
+import { RelatedPlaces } from '@/components/RelatedPlaces';
+import { SaveFavoriteButton } from '@/components/SaveFavoriteButton';
 import { TripBuilderPanel } from '@/components/TripBuilderPanel';
+import { MadiaImage } from '@/components/MadiaImage';
 import {
   getMunicipalityBySlug,
   getPlaceBySlug,
   getPlacesForMunicipality,
-  getPublicPhotoForPlace,
   publicText,
 } from '@/lib/data';
+import { getPlaceGallery, getPlaceImage } from '@/lib/images';
+
+function relatedInMunicipality(
+  municipalityId: string,
+  currentId: string,
+  recordType: 'accommodation' | 'restaurant' | 'transportation_route',
+  limit = 3,
+) {
+  return getPlacesForMunicipality(municipalityId)
+    .filter((place) => place.record_id !== currentId && place.record_type === recordType)
+    .filter((place) => place.official_name && place.application_page_route)
+    .slice(0, limit);
+}
 
 export default async function PlacePage({
   params,
@@ -23,10 +39,11 @@ export default async function PlacePage({
   const place = getPlaceBySlug(slug, placeSlug);
   if (!place) notFound();
 
-  const photo = getPublicPhotoForPlace(place);
+  const heroImage = getPlaceImage(place);
+  const gallery = getPlaceGallery(place);
+  const municipalityPlaces = getPlacesForMunicipality(municipality.meta.id);
   const lat = parseCoordinate(place.latitude);
   const lng = parseCoordinate(place.longitude);
-  const municipalityPlaces = getPlacesForMunicipality(municipality.meta.id);
   const address =
     publicText(place.complete_address) ||
     [publicText(place.barangay), municipality.meta.displayName, 'Camarines Sur']
@@ -36,6 +53,7 @@ export default async function PlacePage({
   const fee = publicText(place.entrance_fee) || publicText(place.price_range);
   const visitDuration = publicText(place.recommended_visit_duration);
   const bestTime = publicText(place.best_time_to_visit);
+  const detailRoute = place.application_page_route || `/municipalities/${slug}/${placeSlug}`;
 
   return (
     <div className="destination-page">
@@ -47,14 +65,16 @@ export default async function PlacePage({
         ← Back to {municipality.meta.displayName}
       </Link>
 
-      {(photo?.original_url || photo?.storage_path) && (
-        <img
-          src={photo.original_url || photo.storage_path}
+      <div className="place-hero madia-image-frame">
+        <MadiaImage
+          src={heroImage.url}
           alt={`${place.official_name} in ${municipality.meta.displayName}`}
-          className="place-hero-image"
-          referrerPolicy="no-referrer"
+          fill
+          priority
+          sizes="100vw"
+          frameClassName="place-hero-image"
         />
-      )}
+      </div>
 
       <article className="destination-hero madia-glass" style={{ marginTop: '1rem' }}>
         <p className="section-kicker">
@@ -71,8 +91,15 @@ export default async function PlacePage({
           <Link href="/ai" className="button button-secondary">
             Ask MADIA
           </Link>
+          <SaveFavoriteButton
+            recordId={place.record_id}
+            placeName={place.official_name}
+            route={detailRoute}
+          />
         </div>
       </article>
+
+      <PlacePhotoGallery images={gallery} title={place.official_name} />
 
       {(lat !== null || address) && (
         <section className="madia-glass detail-panel">
@@ -99,6 +126,12 @@ export default async function PlacePage({
           {bestTime && <p><strong>Best time:</strong> {bestTime}</p>}
         </section>
       )}
+
+      <RelatedPlaces
+        accommodations={relatedInMunicipality(municipality.meta.id, place.record_id, 'accommodation')}
+        restaurants={relatedInMunicipality(municipality.meta.id, place.record_id, 'restaurant')}
+        transport={relatedInMunicipality(municipality.meta.id, place.record_id, 'transportation_route')}
+      />
 
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
         <AiPlacePanel

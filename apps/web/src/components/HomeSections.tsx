@@ -12,7 +12,7 @@ type MunicipalityCard = MunicipalityMapSummary & { image: PlaceImageInfo };
 type PlaceCardData = { place: Place; image: PlaceImageInfo };
 
 interface HomeSectionsProps {
-  municipalities: MunicipalityCard[];
+  municipalities?: MunicipalityCard[];
   accommodations: PlaceCardData[];
   restaurants: PlaceCardData[];
   events: PlaceCardData[];
@@ -48,7 +48,7 @@ function PlaceCard({ place, image }: PlaceCardData) {
 }
 
 export function HomeSections({
-  municipalities,
+  municipalities = [],
   accommodations,
   restaurants,
   events,
@@ -57,6 +57,7 @@ export function HomeSections({
 }: HomeSectionsProps) {
   return (
     <div className="home-sections">
+      {municipalities.length > 0 && (
       <section aria-labelledby="mun-heading" className="home-section">
         <h2 id="mun-heading" className="madia-brand section-title">Explore by municipality</h2>
         <ul className="home-rail">
@@ -81,6 +82,7 @@ export function HomeSections({
           ))}
         </ul>
       </section>
+      )}
 
       <section aria-labelledby="escape-heading" className="home-section">
         <h2 id="escape-heading" className="madia-brand section-title">Find your kind of escape</h2>
