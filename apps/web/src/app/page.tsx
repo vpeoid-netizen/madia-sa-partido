@@ -1,30 +1,129 @@
-import { DestinationCarousel } from '@/components/DestinationCarousel';
-import { HomeSections } from '@/components/HomeSections';
-import { buildCarouselSlides, getHomepageSections } from '@/lib/carousel';
-import { loadRuntimeData } from '@/lib/data';
+import Link from 'next/link';
+import { AttractionCarousel, type AttractionSlide } from '@/components/AttractionCarousel';
+import { PartidoMap } from '@/components/PartidoMap';
+import { loadGeoJson, loadRuntimeData, publicText } from '@/lib/data';
 
 export default function HomePage() {
   const runtime = loadRuntimeData();
-
   if (!runtime) {
-    return (
-      <div style={{ padding: '1rem' }} className="empty-state" role="alert">
-        <h1 className="madia-brand">MADIA sa Partido</h1>
-        <p>
-          Production data has not been imported yet. Run{' '}
-          <code>npm run import:data</code> from the monorepo root after installing dependencies.
-        </p>
-      </div>
-    );
+    throw new Error('MADIA runtime data is required. Run npm run setup from the project root.');
   }
 
-  const slides = buildCarouselSlides();
-  const sections = getHomepageSections();
+  const geojson = loadGeoJson('web');
+  const usablePhotos = runtime.photos.filter(
+    (photo) => photo.public_use_eligibility === 'yes' && (photo.original_url || photo.storage_path),
+  );
+  const photoByRecord = new Map(
+    usablePhotos.filter((photo) => photo.related_record_id).map((photo) => [photo.related_record_id, photo]),
+  );
+  const photoByMunicipality = new Map<string, (typeof usablePhotos)[number]>();
+  usablePhotos.forEach((photo) => {
+    if (!photo.municipality_id) return;
+    if (!photoByMunicipality.has(photo.municipality_id)) {
+      photoByMunicipality.set(photo.municipality_id, photo);
+    }
+  });
+
+  const slides: AttractionSlide[] = runtime.places
+    .filter((place) => place.record_type === 'attraction')
+    .filter((place) => place.official_name && place.application_page_route)
+    .map((place) => {
+      const photo =
+        photoByRecord.get(place.record_id) ||
+        usablePhotos.find((item) => item.photo_id === place.cover_photo_id) ||
+        photoByMunicipality.get(place.municipality_id);
+      const barangay = publicText(place.barangay);
+      const address =
+        publicText(place.complete_address) ||
+        [barangay, place.municipality, 'Camarines Sur'].filter(Boolean).join(', ');
+      const description = publicText(place.short_description) || publicText(place.full_description);
+      const type = [publicText(place.category), publicText(place.subcategory)].filter(Boolean).join(' · ');
+
+      const municipalityName = place.municipality || 'Partido';
+
+      return {
+        id: place.record_id,
+        name: place.official_name,
+        municipality: municipalityName,
+        address,
+        type: type || 'Tourist Attraction',
+        description:
+          description ||
+          `Discover ${place.official_name}, one of the distinctive destinations of ${municipalityName}.`,
+        route: place.application_page_route || `/municipalities/${municipalityName.toLowerCase()}`,
+        imageUrl: photo?.original_url || photo?.storage_path,
+        imageAttribution: photo?.required_attribution,
+      };
+    })
+    .sort((a, b) => a.municipality.localeCompare(b.municipality) || a.name.localeCompare(b.name));
 
   return (
-    <>
-      <DestinationCarousel slides={slides} />
-      <HomeSections {...sections} />
-    </>
+    <div className="home-page">
+      <AttractionCarousel slides={slides} />
+
+      <section className="home-intro content-section" aria-labelledby="partido-heading">
+        <div>
+          <p className="section-kicker">One coast. Ten towns. Countless stories.</p>
+          <h2 id="partido-heading" className="madia-brand section-title">
+            Discover the heart of Partido
+          </h2>
+          <p className="section-lead">
+            Explore islands, waterfalls, heritage churches, local flavors, community celebrations,
+            and quiet coastal escapes across the Fourth District of Camarines Sur.
+          </p>
+        </div>
+        <div className="home-intro__actions">
+          <Link href="/explore" className="button button-primary">
+            Browse destinations
+          </Link>
+          <Link href="/ai" className="button button-secondary">
+            Ask MADIA
+          </Link>
+        </div>
+      </section>
+
+      <section id="municipalities" className="content-section" aria-labelledby="municipalities-heading">
+        <div className="section-heading-row">
+          <div>
+            <p className="section-kicker">Across Partido</p>
+            <h2 id="municipalities-heading" className="madia-brand section-title">
+              Explore every municipality
+            </h2>
+          </div>
+          <Link href="/explore" className="text-link">
+            See all destinations →
+          </Link>
+        </div>
+        <div className="municipality-grid">
+          {runtime.summaries.map((summary) => (
+            <Link
+              key={summary.municipality_id}
+              href={summary.municipality_page_route}
+              className="municipality-card madia-glass"
+            >
+              <span className="municipality-card__count">
+                {summary.attraction_count} destinations
+              </span>
+              <h3>{summary.municipality_name}</h3>
+              <p>{publicText(summary.short_description)}</p>
+              <span className="municipality-card__action">Explore →</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section id="map" className="map-section" aria-labelledby="map-heading">
+        <div className="content-section map-section__intro">
+          <p className="section-kicker">Find your way</p>
+          <h2 id="map-heading" className="madia-brand section-title">
+            Explore Partido on the map
+          </h2>
+          <p className="section-lead">
+            Select a municipality to see its destinations and begin shaping your journey.
+          </p>
+        </div>
+        <PartidoMap geojson={geojson} summaries={runtime.summaries} />
+      </section>
+    </div>
   );
 }

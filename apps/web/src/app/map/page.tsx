@@ -1,6 +1,5 @@
 import { PartidoMap } from '@/components/PartidoMap';
 import { loadGeoJson, loadRuntimeData } from '@/lib/data';
-import { getMunicipalityImage } from '@/lib/images';
 
 export default function MapPage() {
   const runtime = loadRuntimeData();
@@ -16,19 +15,9 @@ export default function MapPage() {
     );
   }
 
-  const summaryImages = Object.fromEntries(
-    summaries.map((summary) => {
-      const image = getMunicipalityImage(summary.municipality_id, summary.cover_photo_id);
-      return [
-        summary.municipality_slug,
-        { url: image.url, attribution: image.attribution },
-      ];
-    }),
-  );
-
   return (
     <div style={{ height: 'calc(100dvh - 6rem)', minHeight: '420px' }}>
-      <PartidoMap geojson={geojson} summaries={summaries} summaryImages={summaryImages} />
+      <PartidoMap geojson={geojson} summaries={summaries} />
     </div>
   );
 }
