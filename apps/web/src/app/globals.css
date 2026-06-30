@@ -949,6 +949,20 @@ main {
   font-size: 0.88rem;
 }
 
+.trip-itinerary__activity {
+  color: var(--madia-forest);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0.15rem 0 0;
+}
+
+.trip-itinerary__notes {
+  color: var(--madia-muted);
+  font-size: 0.85rem;
+  margin: 0.35rem 0 0;
+  line-height: 1.45;
+}
+
 .waze-button {
   background: linear-gradient(135deg, #33ccff 0%, #0099ff 100%);
   border-color: transparent;
@@ -968,6 +982,112 @@ main {
 
 .trips-page {
   max-width: 52rem;
+}
+
+.trip-planner__form {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.trip-planner__field {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.trip-planner__field legend {
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.trip-planner__hint {
+  color: var(--madia-muted);
+  font-size: 0.88rem;
+  margin: 0 0 0.65rem;
+  line-height: 1.5;
+}
+
+.trip-planner__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.trip-planner__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 73, 56, 0.15);
+  background: rgba(255, 253, 247, 0.9);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.trip-planner__chip input {
+  accent-color: var(--madia-forest);
+}
+
+.trip-planner__textarea-label {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  font-weight: 500;
+}
+
+.trip-planner__textarea-label textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(31, 73, 56, 0.15);
+  font: inherit;
+  resize: vertical;
+}
+
+.trip-planner__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.85rem;
+}
+
+.trip-planner__row label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 500;
+}
+
+.trip-planner__row input {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(31, 73, 56, 0.15);
+  font: inherit;
+}
+
+.trip-planner__error {
+  color: #9b2c2c;
+  margin: 0;
+}
+
+.planned-trip__day {
+  margin-top: 1.5rem;
+}
+
+.planned-trip__day h3 {
+  margin: 0 0 0.65rem;
+}
+
+.planned-trip__budget {
+  margin-top: 1.5rem;
+}
+
+.planned-trip__assumptions {
+  color: var(--madia-muted);
+  font-size: 0.88rem;
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
 }
 
 .trips-list {

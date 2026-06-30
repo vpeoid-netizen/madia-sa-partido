@@ -3,8 +3,10 @@ import { wazeLinkForStop, wazeRouteLink, wazeStopFromTripItem, type WazeStop } f
 export interface TripItineraryItem {
   id: string;
   place_name: string;
+  activity?: string;
   start_time?: string;
   end_time?: string;
+  notes?: string;
   latitude?: number | null;
   longitude?: number | null;
   address?: string;
@@ -64,7 +66,9 @@ export function TripItineraryView({
                 <div>
                   {time && <p className="trip-itinerary__time">{time}</p>}
                   <p className="trip-itinerary__name">{item.place_name}</p>
+                  {item.activity && <p className="trip-itinerary__activity">{item.activity}</p>}
                   {item.address && <p className="trip-itinerary__address">{item.address}</p>}
+                  {item.notes && <p className="trip-itinerary__notes">{item.notes}</p>}
                 </div>
               </div>
               <a

@@ -16,7 +16,7 @@ export interface BudgetSummary {
   assumptions: string[];
 }
 
-function parseFeeText(value: string | undefined): { amount: number | null; note: string } {
+export function parseFeeText(value: string | undefined): { amount: number | null; note: string } {
   if (!value || !value.trim()) {
     return { amount: null, note: 'Information not yet available' };
   }
